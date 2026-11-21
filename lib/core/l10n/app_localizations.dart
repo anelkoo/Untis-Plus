@@ -200,6 +200,18 @@ abstract class AppLocalizations {
   /// **'Diese Woche keine Stunden.'**
   String get noLessons;
 
+  /// No description provided for @previousWeek.
+  ///
+  /// In de, this message translates to:
+  /// **'Vorige Woche'**
+  String get previousWeek;
+
+  /// No description provided for @nextWeek.
+  ///
+  /// In de, this message translates to:
+  /// **'Nächste Woche'**
+  String get nextWeek;
+
   /// No description provided for @retry.
   ///
   /// In de, this message translates to:

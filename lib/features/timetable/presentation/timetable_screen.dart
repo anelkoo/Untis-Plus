@@ -11,15 +11,36 @@ import 'timetable_providers.dart';
 
 // shortcut: a plain list to check parsing against a real week; the week/day views replace it
 // in step 3.
-class TimetableScreen extends ConsumerWidget {
+class TimetableScreen extends ConsumerStatefulWidget {
   const TimetableScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<TimetableScreen> createState() => _TimetableScreenState();
+}
+
+class _TimetableScreenState extends ConsumerState<TimetableScreen> {
+  // On Saturday and Sunday, start with the coming week.
+  DateTime monday = mondayOf(DateTime.now().add(const Duration(days: 2)));
+
+  void _shift(int weeks) => setState(() => monday = mondayOf(monday.add(Duration(days: 7 * weeks + 1))));
+
+  Future<void> _pick() async {
+    final now = DateTime.now();
+    final day = await showDatePicker(
+      context: context,
+      initialDate: monday,
+      firstDate: DateTime(now.year - 1),
+      lastDate: DateTime(now.year + 2),
+    );
+    if (day != null) setState(() => monday = mondayOf(day));
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
     final locale = Localizations.localeOf(context).toString();
-    // On Saturday and Sunday, show the coming week.
-    final monday = mondayOf(DateTime.now().add(const Duration(days: 2)));
+    final range = '${DateFormat.Md(locale).format(monday)} – '
+        '${DateFormat.Md(locale).format(monday.add(const Duration(days: 6)))}';
     final provider = weekProvider(me, monday);
     final week = ref.watch(provider);
 
@@ -33,6 +54,22 @@ class TimetableScreen extends ConsumerWidget {
             onPressed: () => ref.read(authProvider.notifier).logout(),
           ),
         ],
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(48),
+          child: Row(children: [
+            IconButton(
+              tooltip: l.previousWeek,
+              icon: const Icon(Icons.chevron_left),
+              onPressed: () => _shift(-1),
+            ),
+            Expanded(child: TextButton(onPressed: _pick, child: Text(range))),
+            IconButton(
+              tooltip: l.nextWeek,
+              icon: const Icon(Icons.chevron_right),
+              onPressed: () => _shift(1),
+            ),
+          ]),
+        ),
       ),
       body: switch (week) {
         AsyncValue(:final Week value) => ListView(

@@ -50,5 +50,14 @@ void main() {
     expect(find.textContaining('Mo 23.11. 07:55–08:45 · D'), findsOneWidget);
     expect(find.textContaining('Entfällt'), findsOneWidget);
     expect(find.textContaining('MUE (HUB)'), findsOneWidget);
+
+    int startDate() =>
+        (((server.requests.last.data as Map)['params'] as Map)['options'] as Map)['startDate'] as int;
+    final first = startDate();
+    await tester.tap(find.byTooltip('Nächste Woche'));
+    await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 200)));
+    await tester.pumpAndSettle();
+    final next = DateTime(first ~/ 10000, first ~/ 100 % 100, first % 100 + 7);
+    expect(startDate(), next.year * 10000 + next.month * 100 + next.day);
   });
 }

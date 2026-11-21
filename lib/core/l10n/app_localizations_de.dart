@@ -66,6 +66,12 @@ class AppLocalizationsDe extends AppLocalizations {
   String get noLessons => 'Diese Woche keine Stunden.';
 
   @override
+  String get previousWeek => 'Vorige Woche';
+
+  @override
+  String get nextWeek => 'Nächste Woche';
+
+  @override
   String get retry => 'Nochmal versuchen';
 
   @override

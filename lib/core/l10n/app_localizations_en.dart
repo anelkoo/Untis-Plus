@@ -65,6 +65,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noLessons => 'No lessons this week.';
 
   @override
+  String get previousWeek => 'Previous week';
+
+  @override
+  String get nextWeek => 'Next week';
+
+  @override
   String get retry => 'Try again';
 
   @override

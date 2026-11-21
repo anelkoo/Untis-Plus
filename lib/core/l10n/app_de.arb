@@ -19,6 +19,8 @@
   "lastUpdated": "Stand {time}",
   "@lastUpdated": { "placeholders": { "time": { "type": "String" } } },
   "noLessons": "Diese Woche keine Stunden.",
+  "previousWeek": "Vorige Woche",
+  "nextWeek": "Nächste Woche",
   "retry": "Nochmal versuchen",
   "statusCancelled": "Entfällt",
   "statusSubstitution": "Vertretung",
