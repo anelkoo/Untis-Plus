@@ -1,0 +1,8 @@
+Package: untis-plus
+Version: @VERSION@
+Section: education
+Priority: optional
+Architecture: amd64
+Depends: libgtk-3-0 | libgtk-3-0t64, libsecret-1-0
+Maintainer: anelkoo
+Description: Untis+ - fast WebUntis timetable client

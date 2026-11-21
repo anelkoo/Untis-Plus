@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Untis+
+Comment=Fast WebUntis timetable client
+Exec=untis-plus
+Icon=untis-plus
+Categories=Education;Office;
+Terminal=false

@@ -1,0 +1,175 @@
+name: Build
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      ios:
+        description: Also build the iOS .ipa
+        type: boolean
+        default: true
+
+env:
+  FLUTTER_VERSION: '3.50.1'
+
+permissions:
+  contents: write # needed to create the GitHub Release on tags
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with: { flutter-version: '${{ env.FLUTTER_VERSION }}', cache: true }
+      - run: flutter pub get
+      - run: flutter analyze
+      - run: flutter test
+      - name: No passwords or session ids in log calls
+        run: |
+          if grep -rnEi '(print|debugPrint|log)\(.*(password|passwort|sessionid|jsessionid)' lib/; then
+            echo "::error::A log/print call mentions a password or session id."; exit 1
+          fi
+
+  android:
+    needs: check
+    runs-on: ubuntu-latest
+    env:
+      KEYSTORE_B64: ${{ secrets.ANDROID_KEYSTORE_B64 }}
+      KEYSTORE_PROPS: ${{ secrets.ANDROID_KEYSTORE_PROPERTIES }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with: { distribution: temurin, java-version: '21' }
+      - uses: subosito/flutter-action@v2
+        with: { flutter-version: '${{ env.FLUTTER_VERSION }}', cache: true }
+      - name: Signing key from secrets
+        if: env.KEYSTORE_B64 != ''
+        run: |
+          echo "$KEYSTORE_B64" | base64 -d > android/app/upload-keystore.jks
+          { echo "$KEYSTORE_PROPS"; echo "storeFile=upload-keystore.jks"; } > android/key.properties
+      - run: flutter build apk --release
+      - run: mkdir -p dist && cp build/app/outputs/flutter-apk/app-release.apk dist/UntisPlus.apk
+      - uses: actions/upload-artifact@v4
+        with: { name: android, path: dist/* }
+
+  windows:
+    needs: check
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with: { flutter-version: '${{ env.FLUTTER_VERSION }}', cache: true }
+      - run: flutter build windows --release
+      - name: Zip and installer
+        shell: pwsh
+        run: |
+          $v = ((Select-String -Path pubspec.yaml -Pattern '^version:\s*([^+\s]+)').Matches[0].Groups[1].Value)
+          New-Item -ItemType Directory -Force dist | Out-Null
+          Compress-Archive -Path build\windows\x64\runner\Release\* -DestinationPath dist\UntisPlus-windows-x64.zip
+          if (-not (Get-Command iscc -ErrorAction SilentlyContinue)) { choco install innosetup -y --no-progress }
+          $iscc = (Get-Command iscc -ErrorAction SilentlyContinue).Source
+          if (-not $iscc) { $iscc = "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe" }
+          & $iscc "/DAppVersion=$v" windows\installer.iss
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - uses: actions/upload-artifact@v4
+        with: { name: windows, path: dist/* }
+
+  linux:
+    needs: check
+    # Older Ubuntu = older glibc, so the binaries also run on older distros.
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          sudo apt-get update
+          sudo apt-get install -y clang cmake ninja-build pkg-config libgtk-3-dev liblzma-dev libsecret-1-dev libjsoncpp-dev libfuse2
+      - uses: subosito/flutter-action@v2
+        with: { flutter-version: '${{ env.FLUTTER_VERSION }}', cache: true }
+      - run: flutter build linux --release
+      - name: Package tar.gz, .deb, AppImage
+        run: |
+          set -e
+          V=$(grep '^version:' pubspec.yaml | sed 's/version: *//; s/+.*//')
+          B=build/linux/x64/release/bundle
+          ICON=android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png
+          mkdir -p dist
+
+          tar -czf dist/untis-plus-linux-x64.tar.gz -C build/linux/x64/release bundle
+
+          D=pkg/deb
+          mkdir -p $D/DEBIAN $D/opt/untis-plus $D/usr/bin $D/usr/share/applications $D/usr/share/icons/hicolor/192x192/apps
+          cp -r $B/. $D/opt/untis-plus/
+          ln -s /opt/untis-plus/untis_plus $D/usr/bin/untis-plus
+          cp linux/packaging/untis-plus.desktop $D/usr/share/applications/
+          cp $ICON $D/usr/share/icons/hicolor/192x192/apps/untis-plus.png
+          sed "s/@VERSION@/$V/" linux/packaging/deb/control > $D/DEBIAN/control
+          dpkg-deb --build --root-owner-group $D dist/untis-plus_${V}_amd64.deb
+
+          A=pkg/AppDir
+          mkdir -p $A
+          cp -r $B/. $A/
+          cp linux/packaging/appimage/AppRun $A/AppRun && chmod +x $A/AppRun
+          cp linux/packaging/untis-plus.desktop $A/
+          cp $ICON $A/untis-plus.png
+          wget -q https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-x86_64.AppImage -O appimagetool
+          chmod +x appimagetool
+          ARCH=x86_64 ./appimagetool --appimage-extract-and-run $A dist/Untis+-${V}-x86_64.AppImage
+      - uses: actions/upload-artifact@v4
+        with: { name: linux, path: dist/* }
+
+  arch:
+    needs: linux
+    runs-on: ubuntu-latest
+    container: archlinux:latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with: { name: linux, path: linux-dist }
+      - name: makepkg
+        run: |
+          set -e
+          pacman -Syu --noconfirm --needed base-devel
+          V=$(grep '^version:' pubspec.yaml | sed 's/version: *//; s/+.*//')
+          mkdir -p /tmp/arch dist
+          sed "s/@VERSION@/$V/" linux/packaging/arch/PKGBUILD > /tmp/arch/PKGBUILD
+          cp linux-dist/untis-plus-linux-x64.tar.gz linux/packaging/untis-plus.desktop /tmp/arch/
+          cp android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png /tmp/arch/untis-plus.png
+          useradd -m builder && chown -R builder /tmp/arch
+          # makepkg refuses to run as root; dependencies are checked on install, not here.
+          su builder -c "cd /tmp/arch && makepkg --nodeps --noconfirm"
+          cp /tmp/arch/*.pkg.tar.zst dist/
+      - uses: actions/upload-artifact@v4
+        with: { name: arch, path: dist/* }
+
+  ios:
+    needs: check
+    if: startsWith(github.ref, 'refs/tags/v') || (github.event_name == 'workflow_dispatch' && inputs.ios)
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with: { flutter-version: '${{ env.FLUTTER_VERSION }}', cache: true }
+      # Unsigned build: SideStore signs it with your own Apple ID on install.
+      - run: flutter build ios --release --no-codesign
+      - run: |
+          mkdir -p Payload dist
+          cp -R build/ios/iphoneos/Runner.app Payload/
+          zip -qry dist/UntisPlus.ipa Payload
+      - uses: actions/upload-artifact@v4
+        with: { name: ios, path: dist/* }
+
+  release:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: [android, windows, linux, arch, ios]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with: { path: dist, merge-multiple: true }
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: dist/*
+          generate_release_notes: true

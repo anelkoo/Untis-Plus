@@ -1,0 +1,19 @@
+# Packages the prebuilt Flutter bundle that CI produces (untis-plus-linux-x64.tar.gz).
+pkgname=untis-plus
+pkgver=@VERSION@
+pkgrel=1
+pkgdesc="Fast WebUntis timetable client"
+arch=('x86_64')
+license=('custom')
+depends=('gtk3' 'libsecret')
+source=("untis-plus-linux-x64.tar.gz" "untis-plus.desktop" "untis-plus.png")
+sha256sums=('SKIP' 'SKIP' 'SKIP')
+options=('!strip' '!debug')
+
+package() {
+  install -d "$pkgdir/opt/untis-plus" "$pkgdir/usr/bin"
+  cp -r "$srcdir/bundle/." "$pkgdir/opt/untis-plus/"
+  ln -s /opt/untis-plus/untis_plus "$pkgdir/usr/bin/untis-plus"
+  install -Dm644 "$srcdir/untis-plus.desktop" "$pkgdir/usr/share/applications/untis-plus.desktop"
+  install -Dm644 "$srcdir/untis-plus.png" "$pkgdir/usr/share/icons/hicolor/192x192/apps/untis-plus.png"
+}
