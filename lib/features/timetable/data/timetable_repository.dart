@@ -37,7 +37,12 @@ class TimetableRepository {
     final row = await (_db.select(_db.cachedWeeks)
           ..where((r) => r.target.equals(_key(target)) & r.monday.equals(untisDate(monday))))
         .getSingleOrNull();
-    return row == null ? null : Week(parseLessons(jsonDecode(row.json) as List), row.fetchedAt);
+    if (row == null) return null;
+    final data = jsonDecode(row.json);
+    // Rows from before exams were cached hold only the period list.
+    return data is List
+        ? Week(parseLessons(data), row.fetchedAt)
+        : Week(parseLessons(data['periods'] as List, data['exams'] as List), row.fetchedAt);
   }
 
   /// Fetches the week from the server unless the stored copy is younger than [minAge], so
@@ -70,14 +75,32 @@ class TimetableRepository {
         'roomFields': fields,
       },
     }) as List;
+    // /api/exams lists the signed-in user's exams, so they only belong on their own timetable.
+    final exams = target == me ? await _exams(monday) : const [];
 
     final now = _now();
     await _db.into(_db.cachedWeeks).insertOnConflictUpdate(CachedWeeksCompanion.insert(
           target: _key(target),
           monday: untisDate(monday),
-          json: jsonEncode(raw),
+          json: jsonEncode({'periods': raw, 'exams': exams}),
           fetchedAt: now,
         ));
-    return Week(parseLessons(raw), now);
+    return Week(parseLessons(raw, exams), now);
+  }
+
+  /// This account's exams in the week. Best effort: without them the timetable is still right,
+  /// only exams show as normal lessons.
+  Future<List<dynamic>> _exams(DateTime monday) async {
+    try {
+      final res = await _client.getRest('/WebUntis/api/exams', {
+        'startDate': '${untisDate(monday)}',
+        'endDate': '${untisDate(monday.add(const Duration(days: 6)))}',
+        'klasseId': '-1',
+        'withGrades': 'false',
+      });
+      return res['data']['exams'] as List;
+    } on Object {
+      return const [];
+    }
   }
 }

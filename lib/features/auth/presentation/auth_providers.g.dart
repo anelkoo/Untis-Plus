@@ -209,7 +209,7 @@ final class AuthProvider extends $AsyncNotifierProvider<Auth, WebUntisClient?> {
   Auth create() => Auth();
 }
 
-String _$authHash() => r'f2a63164b56ea63b85638bcac578888010edc601';
+String _$authHash() => r'ee16a803c1e3b40c405953f90b403e3bffa2a7eb';
 
 /// The signed-in account, or null. A stored login counts as signed in without a network
 /// call, so the app opens offline; the client logs in on its first request.

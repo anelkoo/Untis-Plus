@@ -1,0 +1,1 @@
+{"data":{"exams":[{"id":0,"examType":"SMÜP","name":"D","studentClass":["3AHIT"],"assignedStudents":[{"id":4711,"displayName":"Muster Max","klasse":{"id":0,"name":""},"gradeProtection":false,"disadvantageCompensation":false}],"examDate":20261123,"startTime":755,"endTime":845,"subject":"D","teachers":["HUB"],"rooms":["E12"],"text":"","grade":""}]}}

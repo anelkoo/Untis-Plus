@@ -125,6 +125,7 @@ class _LessonTile extends StatelessWidget {
     return ListTile(
       title: Text([time, names(lesson.subjects), ?status].where((s) => s.isNotEmpty).join(' · ')),
       subtitle: Text([
+        lesson.examType,
         names(lesson.teachers),
         names(lesson.rooms),
         lesson.lessonText,

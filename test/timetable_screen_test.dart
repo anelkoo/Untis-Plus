@@ -28,8 +28,7 @@ void main() {
   testWidgets('a stored login opens the week list, in German', (tester) async {
     tester.platformDispatcher.localesTestValue = const [Locale('de', 'AT')];
     addTearDown(tester.platformDispatcher.clearLocalesTestValue);
-    final server = FakeServer((method, _) =>
-        method == 'authenticate' ? fixture('authenticate_ok.json') : fixture('getTimetable_week.json'));
+    final server = FakeServer(schoolHandler);
     final db = AppDatabase(NativeDatabase.memory());
     addTearDown(db.close);
 
@@ -47,12 +46,14 @@ void main() {
 
     expect(find.textContaining('Stand'), findsOneWidget);
     expect(find.textContaining('Deutsch'), findsNothing); // short names are shown
-    expect(find.textContaining('Mo 23.11. 07:55–08:45 · D'), findsOneWidget);
+    expect(find.textContaining('Mo 23.11. 07:55–08:45 · D · Prüfung'), findsOneWidget);
+    expect(find.textContaining('SMÜP · HUB'), findsOneWidget);
     expect(find.textContaining('Entfällt'), findsOneWidget);
     expect(find.textContaining('MUE (HUB)'), findsOneWidget);
 
     int startDate() =>
-        (((server.requests.last.data as Map)['params'] as Map)['options'] as Map)['startDate'] as int;
+        (((server.requests.lastWhere((r) => r.data is Map).data as Map)['params'] as Map)['options']
+            as Map)['startDate'] as int;
     final first = startDate();
     await tester.tap(find.byTooltip('Nächste Woche'));
     await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 200)));

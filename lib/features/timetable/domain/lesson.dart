@@ -30,13 +30,40 @@ abstract class Lesson with _$Lesson {
     @Default('') String lessonText,
     @Default('') String substitutionText,
     @Default('') String info,
+    /// The school's exam type, e.g. "SMÜP", when an exam falls on this lesson.
+    @Default('') String examType,
   }) = _Lesson;
 }
 
 /// Parses a raw `getTimetable` result, sorted by start. A period that doesn't parse is
-/// skipped so one odd entry can't hide the whole week.
-List<Lesson> parseLessons(List<dynamic> periods) =>
-    [for (final p in periods) ?_tryParse(p)]..sort((a, b) => a.start.compareTo(b.start));
+/// skipped so one odd entry can't hide the whole week. getTimetable doesn't mark exams, so
+/// lessons overlapping an entry of [exams] (from `/api/exams`) become exams.
+List<Lesson> parseLessons(List<dynamic> periods, [List<dynamic> exams = const []]) {
+  final spans = [for (final e in exams) ?_tryExam(e)];
+  return [
+    for (final p in periods)
+      if (_tryParse(p) case final lesson?)
+        switch (spans.where((e) => e.start.isBefore(lesson.end) && lesson.start.isBefore(e.end))) {
+          final hits when hits.isNotEmpty && lesson.status != .cancelled =>
+            lesson.copyWith(status: .exam, examType: hits.first.type),
+          _ => lesson,
+        },
+  ]..sort((a, b) => a.start.compareTo(b.start));
+}
+
+({DateTime start, DateTime end, String type})? _tryExam(Object? e) {
+  try {
+    final m = e as Map;
+    final date = (m['examDate'] as num).toInt();
+    return (
+      start: _at(date, (m['startTime'] as num).toInt()),
+      end: _at(date, (m['endTime'] as num).toInt()),
+      type: '${m['examType'] ?? ''}',
+    );
+  } on Object {
+    return null;
+  }
+}
 
 Lesson? _tryParse(Object? p) {
   try {

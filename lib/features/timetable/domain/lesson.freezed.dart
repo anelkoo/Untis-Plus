@@ -288,7 +288,8 @@ as String?,
 /// @nodoc
 mixin _$Lesson {
 
- int get id; DateTime get start; DateTime get end; LessonStatus get status; List<Named> get subjects; List<Named> get teachers; List<Named> get rooms; List<Named> get classes; String get lessonText; String get substitutionText; String get info;
+ int get id; DateTime get start; DateTime get end; LessonStatus get status; List<Named> get subjects; List<Named> get teachers; List<Named> get rooms; List<Named> get classes; String get lessonText; String get substitutionText; String get info;/// The school's exam type, e.g. "SMÜP", when an exam falls on this lesson.
+ String get examType;
 /// Create a copy of Lesson
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -300,20 +301,20 @@ $LessonCopyWith<Lesson> get copyWith => _$LessonCopyWithImpl<Lesson>(this as Les
 @override
 bool operator ==(Object other) {
   final _this = this as Lesson;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is Lesson&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.start, _this.start) || other.start == _this.start)&&(identical(other.end, _this.end) || other.end == _this.end)&&(identical(other.status, _this.status) || other.status == _this.status)&&const DeepCollectionEquality().equals(other.subjects, _this.subjects)&&const DeepCollectionEquality().equals(other.teachers, _this.teachers)&&const DeepCollectionEquality().equals(other.rooms, _this.rooms)&&const DeepCollectionEquality().equals(other.classes, _this.classes)&&(identical(other.lessonText, _this.lessonText) || other.lessonText == _this.lessonText)&&(identical(other.substitutionText, _this.substitutionText) || other.substitutionText == _this.substitutionText)&&(identical(other.info, _this.info) || other.info == _this.info));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is Lesson&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.start, _this.start) || other.start == _this.start)&&(identical(other.end, _this.end) || other.end == _this.end)&&(identical(other.status, _this.status) || other.status == _this.status)&&const DeepCollectionEquality().equals(other.subjects, _this.subjects)&&const DeepCollectionEquality().equals(other.teachers, _this.teachers)&&const DeepCollectionEquality().equals(other.rooms, _this.rooms)&&const DeepCollectionEquality().equals(other.classes, _this.classes)&&(identical(other.lessonText, _this.lessonText) || other.lessonText == _this.lessonText)&&(identical(other.substitutionText, _this.substitutionText) || other.substitutionText == _this.substitutionText)&&(identical(other.info, _this.info) || other.info == _this.info)&&(identical(other.examType, _this.examType) || other.examType == _this.examType));
 }
 
 
 @override
 int get hashCode {
   final _this = this as Lesson;
-  return Object.hash(runtimeType,_this.id,_this.start,_this.end,_this.status,const DeepCollectionEquality().hash(_this.subjects),const DeepCollectionEquality().hash(_this.teachers),const DeepCollectionEquality().hash(_this.rooms),const DeepCollectionEquality().hash(_this.classes),_this.lessonText,_this.substitutionText,_this.info);
+  return Object.hash(runtimeType,_this.id,_this.start,_this.end,_this.status,const DeepCollectionEquality().hash(_this.subjects),const DeepCollectionEquality().hash(_this.teachers),const DeepCollectionEquality().hash(_this.rooms),const DeepCollectionEquality().hash(_this.classes),_this.lessonText,_this.substitutionText,_this.info,_this.examType);
 }
 
 @override
 String toString() {
   final _this = this as Lesson;
-  return 'Lesson(id: ${_this.id}, start: ${_this.start}, end: ${_this.end}, status: ${_this.status}, subjects: ${_this.subjects}, teachers: ${_this.teachers}, rooms: ${_this.rooms}, classes: ${_this.classes}, lessonText: ${_this.lessonText}, substitutionText: ${_this.substitutionText}, info: ${_this.info})';
+  return 'Lesson(id: ${_this.id}, start: ${_this.start}, end: ${_this.end}, status: ${_this.status}, subjects: ${_this.subjects}, teachers: ${_this.teachers}, rooms: ${_this.rooms}, classes: ${_this.classes}, lessonText: ${_this.lessonText}, substitutionText: ${_this.substitutionText}, info: ${_this.info}, examType: ${_this.examType})';
 }
 
 
@@ -324,7 +325,7 @@ abstract mixin class $LessonCopyWith<$Res>  {
   factory $LessonCopyWith(Lesson value, $Res Function(Lesson) _then) = _$LessonCopyWithImpl;
 @useResult
 $Res call({
- int id, DateTime start, DateTime end, LessonStatus status, List<Named> subjects, List<Named> teachers, List<Named> rooms, List<Named> classes, String lessonText, String substitutionText, String info
+ int id, DateTime start, DateTime end, LessonStatus status, List<Named> subjects, List<Named> teachers, List<Named> rooms, List<Named> classes, String lessonText, String substitutionText, String info, String examType
 });
 
 
@@ -341,7 +342,7 @@ class _$LessonCopyWithImpl<$Res>
 
 /// Create a copy of Lesson
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? start = null,Object? end = null,Object? status = null,Object? subjects = null,Object? teachers = null,Object? rooms = null,Object? classes = null,Object? lessonText = null,Object? substitutionText = null,Object? info = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? start = null,Object? end = null,Object? status = null,Object? subjects = null,Object? teachers = null,Object? rooms = null,Object? classes = null,Object? lessonText = null,Object? substitutionText = null,Object? info = null,Object? examType = null,}) {
   return _then(Lesson(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as int,start: null == start ? _self.start : start // ignore: cast_nullable_to_non_nullable
@@ -354,6 +355,7 @@ as List<Named>,classes: null == classes ? _self.classes : classes // ignore: cas
 as List<Named>,lessonText: null == lessonText ? _self.lessonText : lessonText // ignore: cast_nullable_to_non_nullable
 as String,substitutionText: null == substitutionText ? _self.substitutionText : substitutionText // ignore: cast_nullable_to_non_nullable
 as String,info: null == info ? _self.info : info // ignore: cast_nullable_to_non_nullable
+as String,examType: null == examType ? _self.examType : examType // ignore: cast_nullable_to_non_nullable
 as String,
   ));
 }
@@ -439,10 +441,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int id,  DateTime start,  DateTime end,  LessonStatus status,  List<Named> subjects,  List<Named> teachers,  List<Named> rooms,  List<Named> classes,  String lessonText,  String substitutionText,  String info)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int id,  DateTime start,  DateTime end,  LessonStatus status,  List<Named> subjects,  List<Named> teachers,  List<Named> rooms,  List<Named> classes,  String lessonText,  String substitutionText,  String info,  String examType)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Lesson() when $default != null:
-return $default(_that.id,_that.start,_that.end,_that.status,_that.subjects,_that.teachers,_that.rooms,_that.classes,_that.lessonText,_that.substitutionText,_that.info);case _:
+return $default(_that.id,_that.start,_that.end,_that.status,_that.subjects,_that.teachers,_that.rooms,_that.classes,_that.lessonText,_that.substitutionText,_that.info,_that.examType);case _:
   return orElse();
 
 }
@@ -460,10 +462,10 @@ return $default(_that.id,_that.start,_that.end,_that.status,_that.subjects,_that
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int id,  DateTime start,  DateTime end,  LessonStatus status,  List<Named> subjects,  List<Named> teachers,  List<Named> rooms,  List<Named> classes,  String lessonText,  String substitutionText,  String info)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int id,  DateTime start,  DateTime end,  LessonStatus status,  List<Named> subjects,  List<Named> teachers,  List<Named> rooms,  List<Named> classes,  String lessonText,  String substitutionText,  String info,  String examType)  $default,) {final _that = this;
 switch (_that) {
 case _Lesson():
-return $default(_that.id,_that.start,_that.end,_that.status,_that.subjects,_that.teachers,_that.rooms,_that.classes,_that.lessonText,_that.substitutionText,_that.info);case _:
+return $default(_that.id,_that.start,_that.end,_that.status,_that.subjects,_that.teachers,_that.rooms,_that.classes,_that.lessonText,_that.substitutionText,_that.info,_that.examType);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -480,10 +482,10 @@ return $default(_that.id,_that.start,_that.end,_that.status,_that.subjects,_that
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int id,  DateTime start,  DateTime end,  LessonStatus status,  List<Named> subjects,  List<Named> teachers,  List<Named> rooms,  List<Named> classes,  String lessonText,  String substitutionText,  String info)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int id,  DateTime start,  DateTime end,  LessonStatus status,  List<Named> subjects,  List<Named> teachers,  List<Named> rooms,  List<Named> classes,  String lessonText,  String substitutionText,  String info,  String examType)?  $default,) {final _that = this;
 switch (_that) {
 case _Lesson() when $default != null:
-return $default(_that.id,_that.start,_that.end,_that.status,_that.subjects,_that.teachers,_that.rooms,_that.classes,_that.lessonText,_that.substitutionText,_that.info);case _:
+return $default(_that.id,_that.start,_that.end,_that.status,_that.subjects,_that.teachers,_that.rooms,_that.classes,_that.lessonText,_that.substitutionText,_that.info,_that.examType);case _:
   return null;
 
 }
@@ -495,7 +497,7 @@ return $default(_that.id,_that.start,_that.end,_that.status,_that.subjects,_that
 
 
 class _Lesson implements Lesson {
-  const _Lesson({required this.id, required this.start, required this.end, this.status = LessonStatus.regular,  List<Named> subjects = const [],  List<Named> teachers = const [],  List<Named> rooms = const [],  List<Named> classes = const [], this.lessonText = '', this.substitutionText = '', this.info = ''}): _subjects = subjects,_teachers = teachers,_rooms = rooms,_classes = classes;
+  const _Lesson({required this.id, required this.start, required this.end, this.status = LessonStatus.regular,  List<Named> subjects = const [],  List<Named> teachers = const [],  List<Named> rooms = const [],  List<Named> classes = const [], this.lessonText = '', this.substitutionText = '', this.info = '', this.examType = ''}): _subjects = subjects,_teachers = teachers,_rooms = rooms,_classes = classes;
   
 
 @override final  int id;
@@ -533,6 +535,8 @@ class _Lesson implements Lesson {
 @override@JsonKey() final  String lessonText;
 @override@JsonKey() final  String substitutionText;
 @override@JsonKey() final  String info;
+/// The school's exam type, e.g. "SMÜP", when an exam falls on this lesson.
+@override@JsonKey() final  String examType;
 
 /// Create a copy of Lesson
 /// with the given fields replaced by the non-null parameter values.
@@ -544,18 +548,18 @@ _$LessonCopyWith<_Lesson> get copyWith => __$LessonCopyWithImpl<_Lesson>(this, _
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _Lesson&&(identical(other.id, id) || other.id == id)&&(identical(other.start, start) || other.start == start)&&(identical(other.end, end) || other.end == end)&&(identical(other.status, status) || other.status == status)&&const DeepCollectionEquality().equals(other.subjects, _subjects)&&const DeepCollectionEquality().equals(other.teachers, _teachers)&&const DeepCollectionEquality().equals(other.rooms, _rooms)&&const DeepCollectionEquality().equals(other.classes, _classes)&&(identical(other.lessonText, lessonText) || other.lessonText == lessonText)&&(identical(other.substitutionText, substitutionText) || other.substitutionText == substitutionText)&&(identical(other.info, info) || other.info == info));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _Lesson&&(identical(other.id, id) || other.id == id)&&(identical(other.start, start) || other.start == start)&&(identical(other.end, end) || other.end == end)&&(identical(other.status, status) || other.status == status)&&const DeepCollectionEquality().equals(other.subjects, _subjects)&&const DeepCollectionEquality().equals(other.teachers, _teachers)&&const DeepCollectionEquality().equals(other.rooms, _rooms)&&const DeepCollectionEquality().equals(other.classes, _classes)&&(identical(other.lessonText, lessonText) || other.lessonText == lessonText)&&(identical(other.substitutionText, substitutionText) || other.substitutionText == substitutionText)&&(identical(other.info, info) || other.info == info)&&(identical(other.examType, examType) || other.examType == examType));
 }
 
 
 @override
 int get hashCode {
-    return Object.hash(runtimeType,id,start,end,status,const DeepCollectionEquality().hash(_subjects),const DeepCollectionEquality().hash(_teachers),const DeepCollectionEquality().hash(_rooms),const DeepCollectionEquality().hash(_classes),lessonText,substitutionText,info);
+    return Object.hash(runtimeType,id,start,end,status,const DeepCollectionEquality().hash(_subjects),const DeepCollectionEquality().hash(_teachers),const DeepCollectionEquality().hash(_rooms),const DeepCollectionEquality().hash(_classes),lessonText,substitutionText,info,examType);
 }
 
 @override
 String toString() {
-    return 'Lesson(id: $id, start: $start, end: $end, status: $status, subjects: $subjects, teachers: $teachers, rooms: $rooms, classes: $classes, lessonText: $lessonText, substitutionText: $substitutionText, info: $info)';
+    return 'Lesson(id: $id, start: $start, end: $end, status: $status, subjects: $subjects, teachers: $teachers, rooms: $rooms, classes: $classes, lessonText: $lessonText, substitutionText: $substitutionText, info: $info, examType: $examType)';
 }
 
 
@@ -566,7 +570,7 @@ abstract mixin class _$LessonCopyWith<$Res> implements $LessonCopyWith<$Res> {
   factory _$LessonCopyWith(_Lesson value, $Res Function(_Lesson) _then) = __$LessonCopyWithImpl;
 @override @useResult
 $Res call({
- int id, DateTime start, DateTime end, LessonStatus status, List<Named> subjects, List<Named> teachers, List<Named> rooms, List<Named> classes, String lessonText, String substitutionText, String info
+ int id, DateTime start, DateTime end, LessonStatus status, List<Named> subjects, List<Named> teachers, List<Named> rooms, List<Named> classes, String lessonText, String substitutionText, String info, String examType
 });
 
 
@@ -583,7 +587,7 @@ class __$LessonCopyWithImpl<$Res>
 
 /// Create a copy of Lesson
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? start = null,Object? end = null,Object? status = null,Object? subjects = null,Object? teachers = null,Object? rooms = null,Object? classes = null,Object? lessonText = null,Object? substitutionText = null,Object? info = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? start = null,Object? end = null,Object? status = null,Object? subjects = null,Object? teachers = null,Object? rooms = null,Object? classes = null,Object? lessonText = null,Object? substitutionText = null,Object? info = null,Object? examType = null,}) {
   return _then(_Lesson(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as int,start: null == start ? _self.start : start // ignore: cast_nullable_to_non_nullable
@@ -596,6 +600,7 @@ as List<Named>,classes: null == classes ? _self._classes : classes // ignore: ca
 as List<Named>,lessonText: null == lessonText ? _self.lessonText : lessonText // ignore: cast_nullable_to_non_nullable
 as String,substitutionText: null == substitutionText ? _self.substitutionText : substitutionText // ignore: cast_nullable_to_non_nullable
 as String,info: null == info ? _self.info : info // ignore: cast_nullable_to_non_nullable
+as String,examType: null == examType ? _self.examType : examType // ignore: cast_nullable_to_non_nullable
 as String,
   ));
 }

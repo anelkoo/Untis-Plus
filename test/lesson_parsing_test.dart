@@ -40,4 +40,18 @@ void main() {
     expect(byId[102]!.subjects.single, const Named(id: 22));
     expect(byId[102]!.info, 'Lehrer krank');
   });
+
+  test('lessons overlapping an /api/exams entry become exams, cancelled ones stay cancelled', () {
+    final periods = (jsonDecode(fixture('getTimetable_week.json')) as Map)['result'] as List;
+    final exams = [
+      ...((jsonDecode(fixture('api_exams.json')) as Map)['data']['exams'] as List),
+      {'examDate': 20261123, 'startTime': 845, 'endTime': 935, 'examType': 'SA'},
+      {'broken': true},
+    ];
+    final byId = {for (final l in parseLessons(periods, exams)) l.id: l};
+    expect(byId[101]!.status, LessonStatus.exam);
+    expect(byId[101]!.examType, 'SMÜP');
+    expect(byId[102]!.status, LessonStatus.cancelled);
+    expect(byId[103]!.status, LessonStatus.substitution); // starts as the exam ends
+  });
 }

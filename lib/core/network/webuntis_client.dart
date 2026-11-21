@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:dio/dio.dart';
 
 import '../../features/auth/domain/credentials.dart';
@@ -65,6 +67,30 @@ class WebUntisClient {
       _session = null;
       final fresh = await session();
       return postJsonRpc(_dio, _url, method, params, sessionId: fresh.sessionId);
+    }
+  }
+
+  /// GET on the school's REST API (`/WebUntis/api/...`) with a bearer token for this session.
+  Future<dynamic> getRest(String path, Map<String, String> query) async {
+    final s = await session();
+    final cookie = 'JSESSIONID=${s.sessionId}';
+    try {
+      final token = await _dio.getUri<String>(
+        Uri.https(credentials.school.server, '/WebUntis/api/token/new'),
+        options: Options(headers: {'Cookie': cookie}, responseType: .plain),
+      );
+      final res = await _dio.getUri<String>(
+        Uri.https(credentials.school.server, path, query),
+        options: Options(
+          headers: {'Cookie': cookie, 'Authorization': 'Bearer ${token.data?.trim()}'},
+          responseType: .plain,
+        ),
+      );
+      return jsonDecode(res.data ?? '');
+    } on DioException catch (e) {
+      throw AppFailure.fromDio(e);
+    } on FormatException {
+      throw const ServerFailure(null, 'unexpected response');
     }
   }
 
