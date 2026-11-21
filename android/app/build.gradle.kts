@@ -8,7 +8,7 @@ plugins {
 
 android {
     namespace = "at.anelkoo.untis_plus"
-    compileSdk = flutter.compileSdkVersion
+    compileSdk = 37 // flutter_local_notifications and androidx.core need 37+
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
