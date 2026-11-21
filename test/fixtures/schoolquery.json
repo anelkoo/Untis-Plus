@@ -1,0 +1,21 @@
+{
+    "result": {
+        "size": 0,
+        "schools": [
+            {
+                "server": "htl-donaustadt.webuntis.com",
+                "useMobileServiceUrlAndroid": false,
+                "address": "1220, Wien, Donaustadtstra\u00c3\u0178e 45 ",
+                "displayName": "HTBLA Wien 22",
+                "loginName": "htl-donaustadt",
+                "schoolId": 7048200,
+                "useMobileServiceUrlIos": false,
+                "serverUrl": "https://htl-donaustadt.webuntis.com/WebUntis/?school=htl-donaustadt",
+                "tenantId": "7048200",
+                "mobileServiceUrl": null
+            }
+        ]
+    },
+    "id": "1",
+    "jsonrpc": "2.0"
+}
