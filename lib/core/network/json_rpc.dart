@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:dio/dio.dart';
 
 import '../errors/app_failure.dart';
@@ -17,14 +19,20 @@ Future<dynamic> postJsonRpc(
       data: {'id': '1', 'method': method, 'params': params, 'jsonrpc': '2.0'},
       options: Options(
         contentType: Headers.jsonContentType,
-        responseType: .json,
+        // WebUntis answers with `application/json-rpc`, which Dio won't parse, so decode here.
+        responseType: .plain,
         headers: {if (sessionId != null) 'Cookie': 'JSESSIONID=$sessionId'},
       ),
     );
   } on DioException catch (e) {
     throw AppFailure.fromDio(e);
   }
-  final body = res.data;
+  final Object? body;
+  try {
+    body = jsonDecode('${res.data}');
+  } on FormatException {
+    throw const ServerFailure(null, 'unexpected response');
+  }
   if (body is! Map) throw const ServerFailure(null, 'unexpected response');
   final error = body['error'];
   if (error is Map) {

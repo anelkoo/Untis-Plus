@@ -21,7 +21,8 @@ class FakeServer implements HttpClientAdapter {
     requests.add(options);
     final method = (options.data as Map)['method'] as String;
     return ResponseBody.fromString(handler(method, options), 200, headers: {
-      Headers.contentTypeHeader: [Headers.jsonContentType],
+      // The real WebUntis servers send this, which Dio does not auto-parse as JSON.
+      Headers.contentTypeHeader: ['application/json-rpc;charset=UTF-8'],
     });
   }
 
