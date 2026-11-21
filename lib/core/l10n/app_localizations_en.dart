@@ -57,6 +57,29 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String lastUpdated(String time) {
+    return 'Updated $time';
+  }
+
+  @override
+  String get noLessons => 'No lessons this week.';
+
+  @override
+  String get retry => 'Try again';
+
+  @override
+  String get statusCancelled => 'Cancelled';
+
+  @override
+  String get statusSubstitution => 'Substitution';
+
+  @override
+  String get statusIrregular => 'Changed';
+
+  @override
+  String get statusExam => 'Exam';
+
+  @override
   String get errorNetwork =>
       'Can\'t reach WebUntis. Check your internet connection.';
 

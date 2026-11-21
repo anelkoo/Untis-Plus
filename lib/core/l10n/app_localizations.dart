@@ -188,6 +188,48 @@ abstract class AppLocalizations {
   /// **'Angemeldet als {user}'**
   String signedInAs(String user);
 
+  /// No description provided for @lastUpdated.
+  ///
+  /// In de, this message translates to:
+  /// **'Stand {time}'**
+  String lastUpdated(String time);
+
+  /// No description provided for @noLessons.
+  ///
+  /// In de, this message translates to:
+  /// **'Diese Woche keine Stunden.'**
+  String get noLessons;
+
+  /// No description provided for @retry.
+  ///
+  /// In de, this message translates to:
+  /// **'Nochmal versuchen'**
+  String get retry;
+
+  /// No description provided for @statusCancelled.
+  ///
+  /// In de, this message translates to:
+  /// **'Entfällt'**
+  String get statusCancelled;
+
+  /// No description provided for @statusSubstitution.
+  ///
+  /// In de, this message translates to:
+  /// **'Vertretung'**
+  String get statusSubstitution;
+
+  /// No description provided for @statusIrregular.
+  ///
+  /// In de, this message translates to:
+  /// **'Geändert'**
+  String get statusIrregular;
+
+  /// No description provided for @statusExam.
+  ///
+  /// In de, this message translates to:
+  /// **'Prüfung'**
+  String get statusExam;
+
   /// No description provided for @errorNetwork.
   ///
   /// In de, this message translates to:

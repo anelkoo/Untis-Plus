@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../../../core/db/app_database.dart';
 import '../../../core/network/webuntis_client.dart';
 import '../data/credentials_store.dart';
 import '../data/school_search_api.dart';
@@ -58,6 +59,9 @@ class Auth extends _$Auth {
     final client = state.value;
     state = const AsyncData(null);
     await ref.read(credentialsStoreProvider).delete();
+    // The next account must not see this one's timetable.
+    final db = ref.read(appDatabaseProvider);
+    await db.delete(db.cachedWeeks).go();
     await client?.logout();
   }
 }

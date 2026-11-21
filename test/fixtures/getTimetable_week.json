@@ -1,0 +1,9 @@
+{"jsonrpc":"2.0","id":"1","result":[
+  {"id":105,"date":20261124,"startTime":945,"endTime":1035,"kl":[{"id":1074,"name":"3AHIT","longname":"3. Jahrgang IT"}],"te":[{"id":7,"name":"MUE","longname":"Müller","orgid":5,"orgname":"HUB"}],"su":[{"id":20,"name":"AM","longname":"Angewandte Mathematik"}],"ro":[{"id":30,"name":"E12","longname":"Raum E12"}],"substText":"Vertretung","activityType":"Unterricht"},
+  {"id":101,"date":20261123,"startTime":755,"endTime":845,"kl":[{"id":1074,"name":"3AHIT","longname":"3. Jahrgang IT"}],"te":[{"id":5,"name":"HUB","longname":"Huber"}],"su":[{"id":21,"name":"D","longname":"Deutsch"}],"ro":[{"id":30,"name":"E12","longname":"Raum E12"}],"lstext":"Buch mitnehmen","activityType":"Unterricht"},
+  {"id":102,"date":20261123,"startTime":845,"endTime":935,"code":"cancelled","kl":[{"id":1074}],"te":[{"id":5}],"su":[{"id":22}],"ro":[{"id":30}],"info":"Lehrer krank"},
+  {"id":103,"date":20261123,"startTime":945,"endTime":1035,"kl":[{"id":1074,"name":"3AHIT","longname":"3. Jahrgang IT"}],"te":[{"id":6,"name":"GRU","longname":"Gruber"}],"su":[{"id":23,"name":"E","longname":"Englisch"}],"ro":[{"id":31,"name":"E14","longname":"Raum E14","orgid":30,"orgname":"E12"}]},
+  {"id":104,"date":20261123,"startTime":1045,"endTime":1135,"lstype":"ex","kl":[{"id":1074,"name":"3AHIT","longname":"3. Jahrgang IT"}],"te":[{"id":6,"name":"GRU","longname":"Gruber"}],"su":[{"id":23,"name":"E","longname":"Englisch"}],"ro":[]},
+  {"id":106,"date":20261125,"startTime":1300,"endTime":1500,"code":"irregular","kl":[{"id":1074,"name":"3AHIT","longname":"3. Jahrgang IT"}],"te":[],"su":[],"ro":[],"lstext":"Exkursion"},
+  {"id":107,"startTime":800,"endTime":850}
+]}

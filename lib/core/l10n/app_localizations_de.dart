@@ -58,6 +58,29 @@ class AppLocalizationsDe extends AppLocalizations {
   }
 
   @override
+  String lastUpdated(String time) {
+    return 'Stand $time';
+  }
+
+  @override
+  String get noLessons => 'Diese Woche keine Stunden.';
+
+  @override
+  String get retry => 'Nochmal versuchen';
+
+  @override
+  String get statusCancelled => 'Entfällt';
+
+  @override
+  String get statusSubstitution => 'Vertretung';
+
+  @override
+  String get statusIrregular => 'Geändert';
+
+  @override
+  String get statusExam => 'Prüfung';
+
+  @override
   String get errorNetwork =>
       'Keine Verbindung zu WebUntis. Prüfe deine Internetverbindung.';
 

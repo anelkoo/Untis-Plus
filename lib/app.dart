@@ -5,6 +5,7 @@ import 'core/l10n/app_localizations.dart';
 import 'core/theme/app_theme.dart';
 import 'features/auth/presentation/auth_providers.dart';
 import 'features/auth/presentation/login_screen.dart';
+import 'features/timetable/presentation/timetable_screen.dart';
 
 class UntisPlusApp extends ConsumerWidget {
   const UntisPlusApp({super.key});
@@ -25,31 +26,9 @@ class UntisPlusApp extends ConsumerWidget {
       supportedLocales: AppLocalizations.supportedLocales,
       home: switch (auth) {
         AsyncData(value: null) => const LoginScreen(),
-        AsyncData() => const _SignedInPlaceholder(),
+        AsyncData() => const TimetableScreen(),
         _ => const Scaffold(body: Center(child: CircularProgressIndicator.adaptive())),
       },
-    );
-  }
-}
-
-// shortcut: placeholder until the timetable screen lands in step 3.
-class _SignedInPlaceholder extends ConsumerWidget {
-  const _SignedInPlaceholder();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final l = AppLocalizations.of(context);
-    final creds = ref.watch(authProvider).value!.credentials;
-    return Scaffold(
-      appBar: AppBar(title: Text(l.appTitle)),
-      body: ListTile(
-        title: Text(l.signedInAs(creds.username)),
-        subtitle: Text(creds.school.displayName),
-        trailing: TextButton(
-          onPressed: () => ref.read(authProvider.notifier).logout(),
-          child: Text(l.signOut),
-        ),
-      ),
     );
   }
 }
