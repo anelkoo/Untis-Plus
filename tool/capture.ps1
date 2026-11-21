@@ -67,5 +67,30 @@ Save-Response 'rest_entries.json' {
   Get-Text "https://$Server/WebUntis/api/rest/view/v1/timetable/entries?start=$($monday.ToString('yyyy-MM-dd'))&end=$($sunday.ToString('yyyy-MM-dd'))&format=1&resourceType=STUDENT&resources=$personId&timetableType=MY_TIMETABLE" $bearer
 }
 
+# Teacher timetables: the teacher list, and the first teacher from your own week.
+$teacherId = $null
+try {
+  $own = (Get-Content (Join-Path $out 'getTimetable.json') -Raw | ConvertFrom-Json).result
+  $teacherId = ($own | ForEach-Object { $_.te } | Where-Object { $_.id } | Select-Object -First 1).id
+} catch {}
+Save-Response 'getTeachers.json' { Invoke-Rpc 'getTeachers' @{} }
+Save-Response 'teacher_pageconfig.json' {
+  Get-Text "https://$Server/WebUntis/api/public/timetable/weekly/pageconfig?type=2&date=$($monday.ToString('yyyy-MM-dd'))"
+}
+if ($teacherId) {
+  Write-Host "Lehrer-ID für den Test: $teacherId"
+  Save-Response 'teacher_getTimetable.json' {
+    Invoke-Rpc 'getTimetable' @{ options = @{
+        element = @{ id = $teacherId; type = 2 }
+        startDate = [int]$monday.ToString('yyyyMMdd'); endDate = [int]$sunday.ToString('yyyyMMdd')
+        showLsText = $true; showSubstText = $true; showInfo = $true
+        klasseFields = $fields; teacherFields = $fields; subjectFields = $fields; roomFields = $fields
+      } }
+  }
+  Save-Response 'teacher_weekly_data.json' {
+    Get-Text "https://$Server/WebUntis/api/public/timetable/weekly/data?elementType=2&elementId=$teacherId&date=$($monday.ToString('yyyy-MM-dd'))&formatId=1"
+  }
+}
+
 try { Invoke-Rpc 'logout' @{} | Out-Null } catch {}
 Write-Host "Fertig. Dateien in $((Resolve-Path $out).Path)"

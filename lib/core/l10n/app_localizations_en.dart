@@ -71,6 +71,46 @@ class AppLocalizationsEn extends AppLocalizations {
   String get nextWeek => 'Next week';
 
   @override
+  String get viewDay => 'Day';
+
+  @override
+  String get viewWeek => 'Week';
+
+  @override
+  String get nowLabel => 'Now';
+
+  @override
+  String get nextLabel => 'Next';
+
+  @override
+  String get noLessonsDay => 'No lessons';
+
+  @override
+  String get teachersLabel => 'Teacher';
+
+  @override
+  String get roomsLabel => 'Room';
+
+  @override
+  String get classesLabel => 'Class';
+
+  @override
+  String get previousDay => 'Previous day';
+
+  @override
+  String get nextDay => 'Next day';
+
+  @override
+  String untilTime(String time) {
+    return 'until $time';
+  }
+
+  @override
+  String insteadOf(String name) {
+    return 'instead of $name';
+  }
+
+  @override
   String get retry => 'Try again';
 
   @override

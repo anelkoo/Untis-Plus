@@ -1,3 +1,4 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../core/db/app_database.dart';
@@ -21,4 +22,13 @@ Stream<Week> week(Ref ref, TimetableTarget target, DateTime monday) async* {
     if (cached == null) rethrow;
     yield Week(cached.lessons, cached.fetchedAt, e);
   }
+}
+
+/// Pull-to-refresh: fetches the week (at most once a minute), then reloads [weekProvider] from
+/// the fresh cache. Throws an AppFailure when the fetch fails.
+Future<void> refreshWeek(WidgetRef ref, TimetableTarget target, DateTime monday) async {
+  final client = await ref.read(authProvider.future);
+  if (client == null) return;
+  await TimetableRepository(ref.read(appDatabaseProvider), client).refresh(target, monday);
+  ref.invalidate(weekProvider(target, monday));
 }

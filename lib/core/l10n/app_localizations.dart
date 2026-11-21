@@ -212,6 +212,78 @@ abstract class AppLocalizations {
   /// **'Nächste Woche'**
   String get nextWeek;
 
+  /// No description provided for @viewDay.
+  ///
+  /// In de, this message translates to:
+  /// **'Tag'**
+  String get viewDay;
+
+  /// No description provided for @viewWeek.
+  ///
+  /// In de, this message translates to:
+  /// **'Woche'**
+  String get viewWeek;
+
+  /// No description provided for @nowLabel.
+  ///
+  /// In de, this message translates to:
+  /// **'Jetzt'**
+  String get nowLabel;
+
+  /// No description provided for @nextLabel.
+  ///
+  /// In de, this message translates to:
+  /// **'Danach'**
+  String get nextLabel;
+
+  /// No description provided for @noLessonsDay.
+  ///
+  /// In de, this message translates to:
+  /// **'Kein Unterricht'**
+  String get noLessonsDay;
+
+  /// No description provided for @teachersLabel.
+  ///
+  /// In de, this message translates to:
+  /// **'Lehrer'**
+  String get teachersLabel;
+
+  /// No description provided for @roomsLabel.
+  ///
+  /// In de, this message translates to:
+  /// **'Raum'**
+  String get roomsLabel;
+
+  /// No description provided for @classesLabel.
+  ///
+  /// In de, this message translates to:
+  /// **'Klasse'**
+  String get classesLabel;
+
+  /// No description provided for @previousDay.
+  ///
+  /// In de, this message translates to:
+  /// **'Voriger Tag'**
+  String get previousDay;
+
+  /// No description provided for @nextDay.
+  ///
+  /// In de, this message translates to:
+  /// **'Nächster Tag'**
+  String get nextDay;
+
+  /// No description provided for @untilTime.
+  ///
+  /// In de, this message translates to:
+  /// **'bis {time}'**
+  String untilTime(String time);
+
+  /// No description provided for @insteadOf.
+  ///
+  /// In de, this message translates to:
+  /// **'statt {name}'**
+  String insteadOf(String name);
+
   /// No description provided for @retry.
   ///
   /// In de, this message translates to:

@@ -72,6 +72,46 @@ class AppLocalizationsDe extends AppLocalizations {
   String get nextWeek => 'Nächste Woche';
 
   @override
+  String get viewDay => 'Tag';
+
+  @override
+  String get viewWeek => 'Woche';
+
+  @override
+  String get nowLabel => 'Jetzt';
+
+  @override
+  String get nextLabel => 'Danach';
+
+  @override
+  String get noLessonsDay => 'Kein Unterricht';
+
+  @override
+  String get teachersLabel => 'Lehrer';
+
+  @override
+  String get roomsLabel => 'Raum';
+
+  @override
+  String get classesLabel => 'Klasse';
+
+  @override
+  String get previousDay => 'Voriger Tag';
+
+  @override
+  String get nextDay => 'Nächster Tag';
+
+  @override
+  String untilTime(String time) {
+    return 'bis $time';
+  }
+
+  @override
+  String insteadOf(String name) {
+    return 'statt $name';
+  }
+
+  @override
   String get retry => 'Nochmal versuchen';
 
   @override
