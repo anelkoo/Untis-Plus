@@ -66,7 +66,8 @@ void main() {
     expect(_startDate(server), 20261123);
     expect(find.textContaining('Stand'), findsOneWidget);
     expect(find.textContaining('AM', findRichText: true), findsOneWidget); // Tuesday
-    expect(find.bySemanticsLabel(RegExp(r'^Deutsch, 07:55–08:45, E12, Prüfung$')), findsOneWidget);
+    expect(find.bySemanticsLabel(RegExp(r'^Deutsch, 07:55–08:45, E12, HUB, Prüfung$')), findsOneWidget);
+    expect(find.textContaining('E12\nHUB', findRichText: true), findsOneWidget);
 
     await tester.tap(find.bySemanticsLabel(RegExp('^Deutsch')));
     await tester.pumpAndSettle();

@@ -66,6 +66,7 @@ String semanticsLabel(AppLocalizations l, Lesson lesson, String locale) => [
       lessonTitle(lesson, long: true),
       timeRange(lesson, locale),
       joinNames(lesson.rooms),
+      joinNames(lesson.teachers),
       ?lessonStatus(l, lesson)?.label,
     ].where((s) => s.isNotEmpty).join(', ');
 

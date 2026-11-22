@@ -175,8 +175,9 @@ class _LessonCard extends StatelessWidget {
                     decoration: cancelled ? TextDecoration.lineThrough : null,
                   ),
                 ),
-                if (lesson.rooms.isNotEmpty)
-                  TextSpan(text: '\n${joinNames(lesson.rooms)}', style: text.labelSmall?.copyWith(color: colors.foreground)),
+                for (final line in [joinNames(lesson.rooms), joinNames(lesson.teachers)])
+                  if (line.isNotEmpty)
+                    TextSpan(text: '\n$line', style: text.labelSmall?.copyWith(color: colors.foreground)),
               ]),
               overflow: .clip,
             ),
