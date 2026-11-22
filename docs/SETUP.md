@@ -40,16 +40,24 @@ You need SideStore already set up on the iPhone (with its pairing file and the L
 
 1. On the iPhone, open the Release page (or the downloaded `ios` artifact) in Safari and download `UntisPlus.ipa`. It ends up in the Files app under *Downloads*.
 2. Open **SideStore** → **My Apps** → **+** (top left), then pick `UntisPlus.ipa`.
-3. SideStore signs the app with your Apple ID and installs it. The first time, SideStore may ask whether to keep app extensions. Choose **Keep** once the widget exists (step 5 of the project).
+3. SideStore signs the app with your Apple ID and installs it. SideStore asks whether to keep the app extension: choose **Keep**, otherwise the home screen widget is removed.
 4. A free Apple ID allows **3 active sideloaded apps** (SideStore itself counts as one) and **10 App IDs per 7 days**. Untis+ uses one app slot, plus one App ID for the app and one more for the widget later.
 5. Apps signed with a free Apple ID expire after **7 days**. SideStore's background refresh renews them. Open SideStore every few days to be safe.
 6. To update, install the new `.ipa` the same way. Your login and cache stay.
+
+### Add the widget (iPhone)
+1. Open Untis+ once after installing, so it can hand the widget your timetable.
+2. Long-press the home screen → **Edit** → **Add Widget** → **Untis+** → small or medium.
+3. The widget never goes online. It moves on to the next lesson by itself and gets new data whenever you open the app. If it says "Öffne Untis+ einmal", open the app.
+
+If the widget stays on "Öffne Untis+ einmal" even after opening the app, SideStore set up the app group differently than expected. Tell the developer.
 
 ## 3. Install on Android
 
 1. Download `UntisPlus.apk` onto the phone.
 2. Open it. Android asks you to allow installs from your browser or file manager. Allow it, then tap **Install**.
 3. Updates install over the old version because every CI build is signed with the same key (see section 6).
+4. Widgets: long-press the home screen → **Widgets** → **Untis+** → **Nächste Stunde** (small) or **Heute** (medium). They update at every lesson change and when the app refreshes (in the background every 2 hours).
 
 ## 4. Install on Windows
 
