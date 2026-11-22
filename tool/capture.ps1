@@ -92,5 +92,33 @@ if ($teacherId) {
   }
 }
 
+# Another class (teacher timetables could be built from all class timetables).
+$otherClass = $null
+Save-Response 'classes_pageconfig.json' {
+  Get-Text "https://$Server/WebUntis/api/public/timetable/weekly/pageconfig?type=1&date=$($monday.ToString('yyyy-MM-dd'))"
+}
+try {
+  $classes = (Get-Content (Join-Path $out 'classes_pageconfig.json') -Raw | ConvertFrom-Json).data.elements
+  $otherClass = ($classes | Where-Object { $_.id -ne $auth.result.klasseId } | Select-Object -First 1).id
+} catch {}
+Save-Response 'getKlassen.json' { Invoke-Rpc 'getKlassen' @{} }
+if ($otherClass) {
+  Write-Host "Andere Klasse für den Test: $otherClass"
+  Save-Response 'class_getTimetable.json' {
+    Invoke-Rpc 'getTimetable' @{ options = @{
+        element = @{ id = $otherClass; type = 1 }
+        startDate = [int]$monday.ToString('yyyyMMdd'); endDate = [int]$sunday.ToString('yyyyMMdd')
+        showLsText = $true; showSubstText = $true; showInfo = $true
+        klasseFields = $fields; teacherFields = $fields; subjectFields = $fields; roomFields = $fields
+      } }
+  }
+  Save-Response 'class_weekly_data.json' {
+    Get-Text "https://$Server/WebUntis/api/public/timetable/weekly/data?elementType=1&elementId=$otherClass&date=$($monday.ToString('yyyy-MM-dd'))&formatId=1"
+  }
+  Save-Response 'class_rest_entries.json' {
+    Get-Text "https://$Server/WebUntis/api/rest/view/v1/timetable/entries?start=$($monday.ToString('yyyy-MM-dd'))&end=$($sunday.ToString('yyyy-MM-dd'))&format=1&resourceType=CLASS&resources=$otherClass&timetableType=STANDARD" $bearer
+  }
+}
+
 try { Invoke-Rpc 'logout' @{} | Out-Null } catch {}
 Write-Host "Fertig. Dateien in $((Resolve-Path $out).Path)"
