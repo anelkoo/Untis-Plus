@@ -175,6 +175,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String get changesChannel => 'Timetable changes';
 
   @override
+  String get moreOptions => 'More options';
+
+  @override
+  String get testNotification => 'Send test notification';
+
+  @override
+  String get testNotificationSent =>
+      'Test notification sent. If nothing shows up, check the app\'s notification settings.';
+
+  @override
+  String get testNotificationFailed => 'Could not send a notification.';
+
+  @override
   String get retry => 'Try again';
 
   @override

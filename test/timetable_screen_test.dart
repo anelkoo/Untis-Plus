@@ -120,4 +120,12 @@ void main() {
     await _settle(tester);
     expect(find.text('Jedinger (JEDA)'), findsNothing);
   });
+
+  testWidgets('the menu has the test notification and sign out', (tester) async {
+    await _open(tester, width: 400);
+    await tester.tap(find.byTooltip('Weitere Optionen'));
+    await tester.pumpAndSettle();
+    expect(find.text('Testbenachrichtigung senden'), findsOneWidget);
+    expect(find.text('Abmelden'), findsOneWidget);
+  });
 }

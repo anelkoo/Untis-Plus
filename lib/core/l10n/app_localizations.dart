@@ -386,6 +386,30 @@ abstract class AppLocalizations {
   /// **'Stundenplan-Änderungen'**
   String get changesChannel;
 
+  /// No description provided for @moreOptions.
+  ///
+  /// In de, this message translates to:
+  /// **'Weitere Optionen'**
+  String get moreOptions;
+
+  /// No description provided for @testNotification.
+  ///
+  /// In de, this message translates to:
+  /// **'Testbenachrichtigung senden'**
+  String get testNotification;
+
+  /// No description provided for @testNotificationSent.
+  ///
+  /// In de, this message translates to:
+  /// **'Testbenachrichtigung gesendet. Falls nichts erscheint, prüf die Benachrichtigungs-Einstellungen der App.'**
+  String get testNotificationSent;
+
+  /// No description provided for @testNotificationFailed.
+  ///
+  /// In de, this message translates to:
+  /// **'Benachrichtigung konnte nicht gesendet werden.'**
+  String get testNotificationFailed;
+
   /// No description provided for @retry.
   ///
   /// In de, this message translates to:

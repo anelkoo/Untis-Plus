@@ -176,6 +176,20 @@ class AppLocalizationsDe extends AppLocalizations {
   String get changesChannel => 'Stundenplan-Änderungen';
 
   @override
+  String get moreOptions => 'Weitere Optionen';
+
+  @override
+  String get testNotification => 'Testbenachrichtigung senden';
+
+  @override
+  String get testNotificationSent =>
+      'Testbenachrichtigung gesendet. Falls nichts erscheint, prüf die Benachrichtigungs-Einstellungen der App.';
+
+  @override
+  String get testNotificationFailed =>
+      'Benachrichtigung konnte nicht gesendet werden.';
+
+  @override
   String get retry => 'Nochmal versuchen';
 
   @override

@@ -35,7 +35,7 @@ class TimetableRepository {
   final DateTime Function() _now;
 
   /// Called with what changed in my own timetable since the stored copy, if anything did.
-  final Future<void> Function(List<LessonChange> changes)? onChanges;
+  final Future<Object?> Function(List<LessonChange> changes)? onChanges;
 
   static String _key(TimetableTarget t) => '${t.type}:${t.id}';
 

@@ -79,7 +79,7 @@ class _TimetableScreenState extends ConsumerState<TimetableScreen> {
     _lifecycle = AppLifecycleListener(onResume: () => _refreshMine(const Duration(minutes: 1)));
     // Desktop has no OS background jobs, so refresh on a timer while the app is open.
     if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
-      _desktopTimer = Timer.periodic(backgroundInterval, (_) => _refreshMine(backgroundInterval));
+      _desktopTimer = Timer.periodic(desktopInterval, (_) => _refreshMine(desktopInterval));
     }
   }
 
@@ -138,10 +138,25 @@ class _TimetableScreenState extends ConsumerState<TimetableScreen> {
               if (teacher != null) setState(() => _teacher = teacher);
             },
           ),
-          IconButton(
-            tooltip: l.signOut,
-            icon: const Icon(Icons.logout),
-            onPressed: () => ref.read(authProvider.notifier).logout(),
+          PopupMenuButton<void Function()>(
+            tooltip: l.moreOptions,
+            onSelected: (action) => action(),
+            itemBuilder: (context) => [
+              PopupMenuItem(
+                value: () async {
+                  final sent = await sendTestNotification();
+                  if (!context.mounted) return;
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text(sent ? l.testNotificationSent : l.testNotificationFailed)),
+                  );
+                },
+                child: ListTile(leading: const Icon(Icons.notifications_outlined), title: Text(l.testNotification)),
+              ),
+              PopupMenuItem(
+                value: () => ref.read(authProvider.notifier).logout(),
+                child: ListTile(leading: const Icon(Icons.logout), title: Text(l.signOut)),
+              ),
+            ],
           ),
         ],
         bottom: PreferredSize(

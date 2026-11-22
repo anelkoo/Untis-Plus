@@ -11,9 +11,12 @@ import '../timetable/data/timetable_repository.dart';
 
 const _task = 'at.anelkoo.untis_plus.refresh';
 
-/// The background interval. Android won't go below 15 minutes; iOS decides on its own when
-/// (and whether) to run, usually far less often.
-const backgroundInterval = Duration(minutes: 15);
+/// Background refresh while the app is closed. Every 2 hours on Android to save battery; on
+/// iOS 15 minutes is only the earliest, iOS decides on its own and usually runs far less often.
+Duration get backgroundInterval => Platform.isAndroid ? const Duration(hours: 2) : const Duration(minutes: 15);
+
+/// Refresh while the desktop app is open (desktop has no background jobs).
+const desktopInterval = Duration(minutes: 15);
 
 /// Refreshes my timetable for the weeks that matter now: this week and, from Friday on,
 /// next week. Each week is skipped if it was fetched less than [minAge] ago.
@@ -51,7 +54,8 @@ Future<void> scheduleBackgroundRefresh() async {
       _task,
       frequency: backgroundInterval,
       constraints: Constraints(networkType: NetworkType.connected),
-      existingWorkPolicy: ExistingPeriodicWorkPolicy.keep,
+      // update, not keep: an install that registered a shorter interval switches to this one.
+      existingWorkPolicy: ExistingPeriodicWorkPolicy.update,
     );
   } on Object {
     // Without background refresh the app still refreshes when opened.
