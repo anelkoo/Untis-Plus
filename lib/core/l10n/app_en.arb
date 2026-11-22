@@ -53,6 +53,7 @@
   "testNotification": "Send test notification",
   "testNotificationSent": "Test notification sent. If nothing shows up, check the app's notification settings.",
   "testNotificationFailed": "Could not send a notification.",
+  "widgetNoLessons": "No lessons in the next days",
   "retry": "Try again",
   "statusCancelled": "Cancelled",
   "statusSubstitution": "Substitution",

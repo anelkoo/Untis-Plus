@@ -1,10 +1,10 @@
 import 'dart:io';
-import 'dart:ui';
 
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:intl/intl.dart';
 
 import '../../core/l10n/app_localizations.dart';
+import '../../core/l10n/device_localizations.dart';
 import '../timetable/domain/lesson.dart';
 import '../timetable/domain/timetable_diff.dart';
 
@@ -35,11 +35,6 @@ String changesBody(AppLocalizations l, String locale, List<LessonChange> changes
 final _plugin = FlutterLocalNotificationsPlugin();
 var _ready = false;
 
-/// Also called in the background isolate, where no widget tree provides a locale.
-AppLocalizations _localizations() {
-  final locale = PlatformDispatcher.instance.locale;
-  return lookupAppLocalizations(Locale(locale.languageCode == 'de' ? 'de' : 'en'));
-}
 
 Future<void> initNotifications() async {
   if (_ready) return;
@@ -86,7 +81,7 @@ Future<bool> notifyChanges(List<LessonChange> changes) async {
   if (changes.isEmpty) return false;
   try {
     await initNotifications();
-    final l = _localizations();
+    final l = deviceLocalizations();
     final body = changesBody(l, l.localeName, changes);
     await _plugin.show(
       id: 1,

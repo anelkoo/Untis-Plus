@@ -8,6 +8,7 @@ import '../../core/network/webuntis_client.dart';
 import '../auth/data/credentials_store.dart';
 import '../notifications/change_notifier.dart';
 import '../timetable/data/timetable_repository.dart';
+import '../widgets/widget_bridge.dart';
 
 const _task = 'at.anelkoo.untis_plus.refresh';
 
@@ -34,7 +35,13 @@ void backgroundDispatcher() => Workmanager().executeTask((task, _) async {
       final db = AppDatabase();
       try {
         final repo = TimetableRepository(db, WebUntisClient(createDio(), credentials), onChanges: notifyChanges);
-        await refreshMine(repo, minAge: backgroundInterval);
+        try {
+          await refreshMine(repo, minAge: backgroundInterval);
+        } finally {
+          // iOS: skipped, the background engine has no app group channel. The iOS widget
+          // timeline moves on by itself and gets new data whenever the app opens.
+          if (Platform.isAndroid) await publishWidgets(repo);
+        }
       } on Object {
         // Offline or the server failed: try again next time.
       } finally {

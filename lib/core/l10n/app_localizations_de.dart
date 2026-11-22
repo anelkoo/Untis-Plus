@@ -190,6 +190,9 @@ class AppLocalizationsDe extends AppLocalizations {
       'Benachrichtigung konnte nicht gesendet werden.';
 
   @override
+  String get widgetNoLessons => 'Keine Stunden in den nächsten Tagen';
+
+  @override
   String get retry => 'Nochmal versuchen';
 
   @override

@@ -7,6 +7,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../../core/db/app_database.dart';
 import '../../../core/network/dio_factory.dart';
 import '../../../core/network/webuntis_client.dart';
+import '../../widgets/widget_bridge.dart';
 import '../data/credentials_store.dart';
 import '../data/school_search_api.dart';
 import '../domain/credentials.dart';
@@ -67,6 +68,7 @@ class Auth extends _$Auth {
     // The next account must not see this one's timetable.
     final db = ref.read(appDatabaseProvider);
     await db.delete(db.cachedWeeks).go();
+    await clearWidgets();
     await client?.logout();
   }
 }

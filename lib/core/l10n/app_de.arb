@@ -62,6 +62,7 @@
   "testNotification": "Testbenachrichtigung senden",
   "testNotificationSent": "Testbenachrichtigung gesendet. Falls nichts erscheint, prüf die Benachrichtigungs-Einstellungen der App.",
   "testNotificationFailed": "Benachrichtigung konnte nicht gesendet werden.",
+  "widgetNoLessons": "Keine Stunden in den nächsten Tagen",
   "retry": "Nochmal versuchen",
   "statusCancelled": "Entfällt",
   "statusSubstitution": "Vertretung",

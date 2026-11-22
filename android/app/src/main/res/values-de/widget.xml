@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="widget_next_lesson_name">Nächste Stunde</string>
+    <string name="widget_next_lesson_description">Die aktuelle oder nächste Stunde</string>
+    <string name="widget_today_name">Heute</string>
+    <string name="widget_today_description">Die aktuelle oder nächste Stunde und der Rest des Tages</string>
+    <string name="widget_open_app">Öffne Untis+ einmal</string>
+</resources>

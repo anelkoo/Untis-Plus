@@ -410,6 +410,12 @@ abstract class AppLocalizations {
   /// **'Benachrichtigung konnte nicht gesendet werden.'**
   String get testNotificationFailed;
 
+  /// No description provided for @widgetNoLessons.
+  ///
+  /// In de, this message translates to:
+  /// **'Keine Stunden in den nächsten Tagen'**
+  String get widgetNoLessons;
+
   /// No description provided for @retry.
   ///
   /// In de, this message translates to:

@@ -188,6 +188,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get testNotificationFailed => 'Could not send a notification.';
 
   @override
+  String get widgetNoLessons => 'No lessons in the next days';
+
+  @override
   String get retry => 'Try again';
 
   @override

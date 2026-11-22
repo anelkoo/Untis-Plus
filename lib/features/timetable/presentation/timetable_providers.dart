@@ -5,6 +5,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../../core/db/app_database.dart';
 import '../../background/background_refresh.dart';
 import '../../notifications/change_notifier.dart';
+import '../../widgets/widget_bridge.dart';
 import '../../auth/presentation/auth_providers.dart';
 import '../data/timetable_repository.dart';
 import '../domain/lesson.dart';
@@ -77,8 +78,13 @@ Future<void> refreshWeek(WidgetRef ref, TimetableTarget target, DateTime monday)
 Future<void> refreshMineNow(WidgetRef ref, {required Duration minAge}) async {
   final client = await ref.read(authProvider.future);
   if (client == null) return;
-  await refreshMine(TimetableRepository(ref.read(appDatabaseProvider), client, onChanges: notifyChanges),
-      minAge: minAge);
+  final repo = TimetableRepository(ref.read(appDatabaseProvider), client, onChanges: notifyChanges);
+  try {
+    await refreshMine(repo, minAge: minAge);
+  } finally {
+    // Also offline: the widgets then show the cached lessons, moved on to the current one.
+    await publishWidgets(repo);
+  }
   ref.invalidate(weekProvider);
 }
 

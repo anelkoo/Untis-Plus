@@ -153,12 +153,31 @@ jobs:
       - uses: actions/checkout@v4
       - uses: subosito/flutter-action@v2
         with: { flutter-version: '${{ env.FLUTTER_VERSION }}', cache: true }
-      # Unsigned build: SideStore signs it with your own Apple ID on install.
+      - name: Add the widget extension to the Xcode project
+        run: |
+          gem list -i xcodeproj || sudo gem install xcodeproj --no-document
+          ruby ios/scripts/add_widget_target.rb
+      # Built without a certificate: SideStore signs it with your own Apple ID on install.
       - run: flutter build ios --release --no-codesign
-      - run: |
+      - name: Sign ad hoc with entitlements and package
+        # SideStore reads the app group from the entitlements to set it up for your Apple ID.
+        run: |
+          set -e
+          APP=build/ios/iphoneos/Runner.app
+          for f in "$APP"/Frameworks/*; do codesign -f -s - "$f"; done
+          codesign -f -s - --entitlements ios/UntisPlusWidget/UntisPlusWidget.entitlements "$APP/PlugIns/UntisPlusWidget.appex"
+          codesign -f -s - --entitlements ios/Runner/Runner.entitlements "$APP"
           mkdir -p Payload dist
-          cp -R build/ios/iphoneos/Runner.app Payload/
+          cp -R "$APP" Payload/
           zip -qry dist/UntisPlus.ipa Payload
+      - name: Check the widget is embedded with the app group
+        run: |
+          set -e
+          unzip -q dist/UntisPlus.ipa -d check
+          for b in check/Payload/Runner.app check/Payload/Runner.app/PlugIns/UntisPlusWidget.appex; do
+            test -d "$b" || { echo "::error::missing $b"; exit 1; }
+            codesign -d --entitlements - "$b" 2>&1 | grep -q group.at.anelkoo.untisPlus || { echo "::error::no app group in $b"; exit 1; }
+          done
       - uses: actions/upload-artifact@v4
         with: { name: ios, path: dist/* }
 

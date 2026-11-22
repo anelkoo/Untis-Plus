@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="widget_next_lesson_name">Next lesson</string>
+    <string name="widget_next_lesson_description">The current or next lesson</string>
+    <string name="widget_today_name">Today</string>
+    <string name="widget_today_description">The current or next lesson and the rest of the day</string>
+    <string name="widget_open_app">Open Untis+ once</string>
+    <color name="widget_background">#FFF3F6FB</color>
+    <color name="widget_text">#FF1A1C1E</color>
+    <color name="widget_secondary">#FF43474E</color>
+    <color name="widget_accent">#FF2F5D8A</color>
+    <color name="widget_status">#FFB3261E</color>
+</resources>
