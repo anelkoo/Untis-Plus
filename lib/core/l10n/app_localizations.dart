@@ -416,6 +416,24 @@ abstract class AppLocalizations {
   /// **'Keine Stunden in den nächsten Tagen'**
   String get widgetNoLessons;
 
+  /// No description provided for @exportCalendar.
+  ///
+  /// In de, this message translates to:
+  /// **'In Kalender exportieren'**
+  String get exportCalendar;
+
+  /// No description provided for @exportSaved.
+  ///
+  /// In de, this message translates to:
+  /// **'Gespeichert: {path}'**
+  String exportSaved(String path);
+
+  /// No description provided for @exportFailed.
+  ///
+  /// In de, this message translates to:
+  /// **'Export fehlgeschlagen: {error}'**
+  String exportFailed(String error);
+
   /// No description provided for @retry.
   ///
   /// In de, this message translates to:

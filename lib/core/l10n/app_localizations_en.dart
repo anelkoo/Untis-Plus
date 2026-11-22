@@ -191,6 +191,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String get widgetNoLessons => 'No lessons in the next days';
 
   @override
+  String get exportCalendar => 'Export to calendar';
+
+  @override
+  String exportSaved(String path) {
+    return 'Saved: $path';
+  }
+
+  @override
+  String exportFailed(String error) {
+    return 'Export failed: $error';
+  }
+
+  @override
   String get retry => 'Try again';
 
   @override

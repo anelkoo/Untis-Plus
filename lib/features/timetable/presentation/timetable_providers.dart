@@ -4,6 +4,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../core/db/app_database.dart';
 import '../../background/background_refresh.dart';
+import '../../export/export_calendar.dart';
 import '../../notifications/change_notifier.dart';
 import '../../widgets/widget_bridge.dart';
 import '../../auth/presentation/auth_providers.dart';
@@ -95,4 +96,11 @@ Future<void> refreshClassesWeek(WidgetRef ref, DateTime monday) async {
   await TimetableRepository(ref.read(appDatabaseProvider), client)
       .refreshClasses(monday, minAge: const Duration(minutes: 15));
   ref.invalidate(classesWeekProvider(monday));
+}
+
+/// My timetable for the coming weeks as an .ics file (see exportCalendar).
+Future<String?> exportMyCalendar(WidgetRef ref) async {
+  final client = await ref.read(authProvider.future);
+  if (client == null) return null;
+  return exportCalendar(TimetableRepository(ref.read(appDatabaseProvider), client, onChanges: notifyChanges));
 }

@@ -193,6 +193,19 @@ class AppLocalizationsDe extends AppLocalizations {
   String get widgetNoLessons => 'Keine Stunden in den nächsten Tagen';
 
   @override
+  String get exportCalendar => 'In Kalender exportieren';
+
+  @override
+  String exportSaved(String path) {
+    return 'Gespeichert: $path';
+  }
+
+  @override
+  String exportFailed(String error) {
+    return 'Export fehlgeschlagen: $error';
+  }
+
+  @override
   String get retry => 'Nochmal versuchen';
 
   @override

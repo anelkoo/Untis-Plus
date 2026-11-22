@@ -153,6 +153,18 @@ class _TimetableScreenState extends ConsumerState<TimetableScreen> {
                 child: ListTile(leading: const Icon(Icons.notifications_outlined), title: Text(l.testNotification)),
               ),
               PopupMenuItem(
+                value: () async {
+                  final messenger = ScaffoldMessenger.of(context);
+                  try {
+                    final path = await exportMyCalendar(ref);
+                    if (path != null) messenger.showSnackBar(SnackBar(content: Text(l.exportSaved(path))));
+                  } on Object catch (e) {
+                    messenger.showSnackBar(SnackBar(content: Text(l.exportFailed(failureText(l, e)))));
+                  }
+                },
+                child: ListTile(leading: const Icon(Icons.event_outlined), title: Text(l.exportCalendar)),
+              ),
+              PopupMenuItem(
                 value: () => ref.read(authProvider.notifier).logout(),
                 child: ListTile(leading: const Icon(Icons.logout), title: Text(l.signOut)),
               ),
