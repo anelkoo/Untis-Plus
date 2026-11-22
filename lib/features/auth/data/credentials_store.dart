@@ -7,7 +7,12 @@ import '../domain/credentials.dart';
 /// Keeps the login in the OS keychain (iOS Keychain, Android Keystore, Windows Credential
 /// Manager, Linux libsecret).
 class CredentialsStore {
-  CredentialsStore([this._storage = const FlutterSecureStorage()]);
+  // iOS: readable after the first unlock, so the background refresh works on a locked phone.
+  CredentialsStore([
+    this._storage = const FlutterSecureStorage(
+      iOptions: IOSOptions(accessibility: KeychainAccessibility.first_unlock),
+    ),
+  ]);
 
   final FlutterSecureStorage _storage;
   static const _key = 'credentials';
@@ -22,8 +27,11 @@ class CredentialsStore {
     }
   }
 
-  Future<void> write(Credentials c) =>
-      _storage.write(key: _key, value: jsonEncode(c.toJson()));
+  /// Deletes first: an update would keep an older entry's keychain access level.
+  Future<void> write(Credentials c) async {
+    await delete();
+    await _storage.write(key: _key, value: jsonEncode(c.toJson()));
+  }
 
   Future<void> delete() async {
     try {

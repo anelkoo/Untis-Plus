@@ -338,6 +338,54 @@ abstract class AppLocalizations {
   /// **'Alle Lehrkräfte'**
   String get allTeachersLabel;
 
+  /// No description provided for @changesTitle.
+  ///
+  /// In de, this message translates to:
+  /// **'Stundenplan geändert'**
+  String get changesTitle;
+
+  /// No description provided for @changeCancelled.
+  ///
+  /// In de, this message translates to:
+  /// **'{lesson}: entfällt'**
+  String changeCancelled(String lesson);
+
+  /// No description provided for @changeSubstitution.
+  ///
+  /// In de, this message translates to:
+  /// **'{lesson}: Vertretung {teacher}'**
+  String changeSubstitution(String lesson, String teacher);
+
+  /// No description provided for @changeRoom.
+  ///
+  /// In de, this message translates to:
+  /// **'{lesson}: jetzt in {room}'**
+  String changeRoom(String lesson, String room);
+
+  /// No description provided for @changeExam.
+  ///
+  /// In de, this message translates to:
+  /// **'{lesson}: Prüfung'**
+  String changeExam(String lesson);
+
+  /// No description provided for @changeAdded.
+  ///
+  /// In de, this message translates to:
+  /// **'{lesson}: zusätzlich'**
+  String changeAdded(String lesson);
+
+  /// No description provided for @changesMore.
+  ///
+  /// In de, this message translates to:
+  /// **'+{count} weitere'**
+  String changesMore(int count);
+
+  /// No description provided for @changesChannel.
+  ///
+  /// In de, this message translates to:
+  /// **'Stundenplan-Änderungen'**
+  String get changesChannel;
+
   /// No description provided for @retry.
   ///
   /// In de, this message translates to:

@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../core/db/app_database.dart';
+import '../../background/background_refresh.dart';
+import '../../notifications/change_notifier.dart';
 import '../../auth/presentation/auth_providers.dart';
 import '../data/timetable_repository.dart';
 import '../domain/lesson.dart';
@@ -28,7 +30,9 @@ Stream<Week> classesWeek(Ref ref, DateTime monday) async* {
 
 Future<TimetableRepository?> _repo(Ref ref) async {
   final client = await ref.watch(authProvider.future);
-  return client == null ? null : TimetableRepository(ref.watch(appDatabaseProvider), client);
+  return client == null
+      ? null
+      : TimetableRepository(ref.watch(appDatabaseProvider), client, onChanges: notifyChanges);
 }
 
 Stream<Week> _cachedThenFresh(Future<Week?> cachedWeek, Future<Week> Function() refresh) async* {
@@ -65,8 +69,17 @@ Future<void> toggleFavourite(WidgetRef ref, Named teacher, {required bool favour
 Future<void> refreshWeek(WidgetRef ref, TimetableTarget target, DateTime monday) async {
   final client = await ref.read(authProvider.future);
   if (client == null) return;
-  await TimetableRepository(ref.read(appDatabaseProvider), client).refresh(target, monday);
+  await TimetableRepository(ref.read(appDatabaseProvider), client, onChanges: notifyChanges).refresh(target, monday);
   ref.invalidate(weekProvider(target, monday));
+}
+
+/// Refreshes my relevant weeks (on resume and on the desktop timer) and reloads what's shown.
+Future<void> refreshMineNow(WidgetRef ref, {required Duration minAge}) async {
+  final client = await ref.read(authProvider.future);
+  if (client == null) return;
+  await refreshMine(TimetableRepository(ref.read(appDatabaseProvider), client, onChanges: notifyChanges),
+      minAge: minAge);
+  ref.invalidate(weekProvider);
 }
 
 /// Pull-to-refresh for teacher timetables: all classes, at most every 15 minutes.

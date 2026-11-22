@@ -26,7 +26,6 @@ class WeekGrid extends StatelessWidget {
   final List<Lesson> lessons;
   final DateTime now;
 
-  static const _axisWidth = 44.0;
   static const _headerHeight = 44.0; // estimate, only used to fit the grid to the screen
 
   @override
@@ -42,8 +41,17 @@ class WeekGrid extends StatelessWidget {
     final to = lessons.isEmpty ? 16 * 60 : lessons.map((l) => minuteOf(l.end)).reduce(math.max);
 
     return LayoutBuilder(builder: (context, constraints) {
-      // Fill the screen height, but keep short lessons tall enough to read.
-      final scale = math.max((constraints.maxHeight - _headerHeight - 8) / (to - from), 1.0);
+      // Tall enough that the shortest lesson fits subject, room and teacher at the user's text
+      // size; taller when the screen has room. Odd 5-minute slots don't stretch the whole grid.
+      final text = Theme.of(context).textTheme;
+      final scaler = MediaQuery.textScalerOf(context);
+      double line(TextStyle? s) => scaler.scale((s?.fontSize ?? 14) * (s?.height ?? 1.4));
+      final axisWidth = scaler.scale(40) + 6;
+      final cardHeight = line(text.labelLarge) + 2 * line(text.labelSmall) + 8;
+      final shortest = lessons.isEmpty
+          ? 50
+          : math.max(lessons.map((l) => l.end.difference(l.start).inMinutes).reduce(math.min), 40);
+      final scale = math.max((constraints.maxHeight - _headerHeight - 8) / (to - from), cardHeight / shortest);
       final height = (to - from) * scale;
       double y(DateTime t) => (minuteOf(t) - from) * scale;
 
@@ -60,7 +68,7 @@ class WeekGrid extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 4),
             child: Row(children: [
-              const SizedBox(width: _axisWidth),
+              SizedBox(width: axisWidth),
               for (final day in days)
                 Expanded(child: _DayHeader(day: day, locale: locale, today: DateUtils.isSameDay(day, now))),
             ]),
@@ -69,7 +77,7 @@ class WeekGrid extends StatelessWidget {
             height: height + 8,
             child: Row(crossAxisAlignment: .start, children: [
               SizedBox(
-                width: _axisWidth,
+                width: axisWidth,
                 height: height,
                 child: Stack(children: [
                   for (final m in labels)

@@ -1,7 +1,11 @@
+import 'dart:async';
+import 'dart:io';
+
 import 'package:dio/dio.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../core/db/app_database.dart';
+import '../../../core/network/dio_factory.dart';
 import '../../../core/network/webuntis_client.dart';
 import '../data/credentials_store.dart';
 import '../data/school_search_api.dart';
@@ -11,10 +15,7 @@ import '../domain/school.dart';
 part 'auth_providers.g.dart';
 
 @Riverpod(keepAlive: true)
-Dio dio(Ref ref) => Dio(BaseOptions(
-      connectTimeout: const Duration(seconds: 10),
-      receiveTimeout: const Duration(seconds: 20),
-    ));
+Dio dio(Ref ref) => createDio();
 
 @Riverpod(keepAlive: true)
 CredentialsStore credentialsStore(Ref ref) => CredentialsStore();
@@ -37,8 +38,12 @@ Future<List<School>> schoolSearch(Ref ref, String query) async {
 class Auth extends _$Auth {
   @override
   Future<WebUntisClient?> build() async {
-    final stored = await ref.read(credentialsStoreProvider).read();
-    return stored == null ? null : WebUntisClient(ref.read(dioProvider), stored);
+    final store = ref.read(credentialsStoreProvider);
+    final stored = await store.read();
+    if (stored == null) return null;
+    // Logins saved before the background refresh existed were only readable while unlocked.
+    if (Platform.isIOS) unawaited(store.write(stored).catchError((Object _) {}));
+    return WebUntisClient(ref.read(dioProvider), stored);
   }
 
   /// Checks the login against the server. Throws an AppFailure if it is rejected.

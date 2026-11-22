@@ -5,6 +5,7 @@ import 'package:drift/drift.dart';
 import '../../../core/db/app_database.dart';
 import '../../../core/network/webuntis_client.dart';
 import '../domain/lesson.dart';
+import '../domain/timetable_diff.dart';
 
 /// Whose timetable: [me] or another element, e.g. a teacher `(type: 2, id: 42)`.
 typedef TimetableTarget = ({int type, int id});
@@ -26,11 +27,15 @@ class Week {
 }
 
 class TimetableRepository {
-  TimetableRepository(this._db, this._client, {DateTime Function()? now}) : _now = now ?? DateTime.now;
+  TimetableRepository(this._db, this._client, {DateTime Function()? now, this.onChanges})
+      : _now = now ?? DateTime.now;
 
   final AppDatabase _db;
   final WebUntisClient _client;
   final DateTime Function() _now;
+
+  /// Called with what changed in my own timetable since the stored copy, if anything did.
+  final Future<void> Function(List<LessonChange> changes)? onChanges;
 
   static String _key(TimetableTarget t) => '${t.type}:${t.id}';
 
@@ -87,7 +92,13 @@ class TimetableRepository {
           json: jsonEncode({'periods': raw, 'exams': exams}),
           fetchedAt: now,
         ));
-    return Week(parseLessons(raw, exams), now);
+    final fresh = Week(parseLessons(raw, exams), now);
+    // No stored copy means a first fetch: nothing to compare, so no flood of notifications.
+    if (old != null && target == me && onChanges != null) {
+      final changes = diffLessons(old.lessons, fresh.lessons, now);
+      if (changes.isNotEmpty) await onChanges!(changes);
+    }
+    return fresh;
   }
 
   /// This account's exams in the week. Best effort: without them the timetable is still right,

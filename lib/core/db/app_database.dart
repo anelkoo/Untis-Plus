@@ -26,7 +26,12 @@ class FavouriteTeachers extends Table {
 
 @DriftDatabase(tables: [CachedWeeks, FavouriteTeachers])
 class AppDatabase extends _$AppDatabase {
-  AppDatabase([QueryExecutor? executor]) : super(executor ?? driftDatabase(name: 'untis_plus'));
+  AppDatabase([QueryExecutor? executor]) : super(executor ??
+            driftDatabase(
+              name: 'untis_plus',
+              // The background refresh opens the database while the app may be open too.
+              native: const DriftNativeOptions(shareAcrossIsolates: true),
+            ));
 
   @override
   int get schemaVersion => 2;

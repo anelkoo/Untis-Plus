@@ -6,6 +6,7 @@ import 'package:untis_plus/features/auth/domain/credentials.dart';
 import 'package:untis_plus/features/auth/domain/school.dart';
 import 'package:untis_plus/features/timetable/data/timetable_repository.dart';
 import 'package:untis_plus/features/timetable/domain/lesson.dart';
+import 'package:untis_plus/features/timetable/domain/timetable_diff.dart';
 
 import 'fake_server.dart';
 
@@ -110,6 +111,24 @@ void main() {
     now = now.add(const Duration(hours: 2));
     await repo.refreshClasses(monday);
     expect(server.requests.length, greaterThan(count));
+  });
+
+  test('reports changes against the stored copy, but not on the first fetch', () async {
+    final reported = <List<LessonChange>>[];
+    repo = TimetableRepository(db, WebUntisClient(server.dio, _creds), now: () => now,
+        onChanges: (c) async => reported.add(c));
+    await repo.refresh(me, _monday);
+    expect(reported, isEmpty);
+
+    // The next fetch says Deutsch at 07:55 is cancelled.
+    server = FakeServer((m, r) => m == 'getTimetable'
+        ? fixture('getTimetable_week.json').replaceFirst('"id":101,', '"id":101,"code":"cancelled",')
+        : schoolHandler(m, r));
+    repo = TimetableRepository(db, WebUntisClient(server.dio, _creds), now: () => now,
+        onChanges: (c) async => reported.add(c));
+    now = now.add(const Duration(minutes: 2));
+    await repo.refresh(me, _monday);
+    expect(reported.single.map((c) => (c.kind, c.lesson.id)), [(ChangeKind.cancelled, 101)]);
   });
 
   test('mondayOf', () {

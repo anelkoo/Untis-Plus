@@ -139,6 +139,42 @@ class AppLocalizationsEn extends AppLocalizations {
   String get allTeachersLabel => 'All teachers';
 
   @override
+  String get changesTitle => 'Timetable changed';
+
+  @override
+  String changeCancelled(String lesson) {
+    return '$lesson: cancelled';
+  }
+
+  @override
+  String changeSubstitution(String lesson, String teacher) {
+    return '$lesson: substitute $teacher';
+  }
+
+  @override
+  String changeRoom(String lesson, String room) {
+    return '$lesson: now in $room';
+  }
+
+  @override
+  String changeExam(String lesson) {
+    return '$lesson: exam';
+  }
+
+  @override
+  String changeAdded(String lesson) {
+    return '$lesson: extra lesson';
+  }
+
+  @override
+  String changesMore(int count) {
+    return '+$count more';
+  }
+
+  @override
+  String get changesChannel => 'Timetable changes';
+
+  @override
   String get retry => 'Try again';
 
   @override

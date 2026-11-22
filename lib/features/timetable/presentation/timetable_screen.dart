@@ -1,3 +1,6 @@
+import 'dart:async';
+import 'dart:io';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:material_ui/material_ui.dart';
@@ -5,6 +8,8 @@ import 'package:material_ui/material_ui.dart';
 import '../../../core/errors/failure_text.dart';
 import '../../../core/l10n/app_localizations.dart';
 import '../../auth/presentation/auth_providers.dart';
+import '../../background/background_refresh.dart';
+import '../../notifications/change_notifier.dart';
 import '../data/timetable_repository.dart';
 import '../domain/lesson.dart';
 import 'day_view.dart';
@@ -63,8 +68,27 @@ class _TimetableScreenState extends ConsumerState<TimetableScreen> {
     _page = page;
   }
 
+  late final AppLifecycleListener _lifecycle;
+  Timer? _desktopTimer;
+
+  @override
+  void initState() {
+    super.initState();
+    unawaited(requestNotificationPermission());
+    // Back in the foreground: refresh (at most once a minute), which also notifies changes.
+    _lifecycle = AppLifecycleListener(onResume: () => _refreshMine(const Duration(minutes: 1)));
+    // Desktop has no OS background jobs, so refresh on a timer while the app is open.
+    if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
+      _desktopTimer = Timer.periodic(backgroundInterval, (_) => _refreshMine(backgroundInterval));
+    }
+  }
+
+  void _refreshMine(Duration minAge) => unawaited(refreshMineNow(ref, minAge: minAge).catchError((Object _) {}));
+
   @override
   void dispose() {
+    _lifecycle.dispose();
+    _desktopTimer?.cancel();
     if (_weekMode != null) _pager.dispose();
     super.dispose();
   }
