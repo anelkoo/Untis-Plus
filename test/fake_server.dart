@@ -39,5 +39,9 @@ String schoolHandler(String method, RequestOptions _) => switch (method) {
       'getTimetable' => fixture('getTimetable_week.json'),
       '/WebUntis/api/token/new' => 'header.payload.signature',
       '/WebUntis/api/exams' => fixture('api_exams.json'),
+      '/WebUntis/api/public/timetable/weekly/pageconfig' =>
+        '{"data":{"elements":[{"type":1,"id":1074,"name":"1AHIT","longName":"1a Muster"},'
+            '{"type":1,"id":1075,"name":"2AHIT","longName":"2a"}]}}',
+      '/WebUntis/api/rest/view/v1/timetable/entries' => fixture('rest_class_week.json'),
       _ => throw StateError('unexpected call $method'),
     };

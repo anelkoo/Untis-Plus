@@ -71,18 +71,37 @@ class WebUntisClient {
   }
 
   /// GET on the school's REST API (`/WebUntis/api/...`) with a bearer token for this session.
+  /// On a 401 it logs in again and retries once.
   Future<dynamic> getRest(String path, Map<String, String> query) async {
+    try {
+      return await _getRest(path, query);
+    } on ServerFailure catch (e) {
+      if (e.code != 401) rethrow;
+      _session = null;
+      _token = null;
+      return _getRest(path, query);
+    }
+  }
+
+  ({String value, DateTime at})? _token;
+
+  Future<dynamic> _getRest(String path, Map<String, String> query) async {
     final s = await session();
     final cookie = 'JSESSIONID=${s.sessionId}';
     try {
-      final token = await _dio.getUri<String>(
-        Uri.https(credentials.school.server, '/WebUntis/api/token/new'),
-        options: Options(headers: {'Cookie': cookie}, responseType: .plain),
-      );
+      // A token lasts longer than this; reusing it saves a request per call.
+      var token = _token;
+      if (token == null || DateTime.now().difference(token.at) > const Duration(minutes: 5)) {
+        final res = await _dio.getUri<String>(
+          Uri.https(credentials.school.server, '/WebUntis/api/token/new'),
+          options: Options(headers: {'Cookie': cookie}, responseType: .plain),
+        );
+        token = _token = (value: '${res.data}'.trim(), at: DateTime.now());
+      }
       final res = await _dio.getUri<String>(
         Uri.https(credentials.school.server, path, query),
         options: Options(
-          headers: {'Cookie': cookie, 'Authorization': 'Bearer ${token.data?.trim()}'},
+          headers: {'Cookie': cookie, 'Authorization': 'Bearer ${token.value}'},
           responseType: .plain,
         ),
       );

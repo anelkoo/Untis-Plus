@@ -89,6 +89,29 @@ void main() {
     expect(week.lessons.first.status, LessonStatus.regular);
   });
 
+  test('loads every class through the REST view, merges them, and caches for 6 hours', () async {
+    final monday = DateTime(2026, 11, 16);
+    final week = await repo.refreshClasses(monday);
+    final rest = server.requests.where((r) => r.uri.path.endsWith('/timetable/entries')).toList();
+    expect(rest.map((r) => r.uri.queryParameters['resources']), ['1074', '1075']);
+    expect(rest.first.uri.queryParameters['resourceType'], 'CLASS');
+    expect(rest.first.uri.queryParameters['start'], '2026-11-16');
+    expect(rest.first.uri.queryParameters['end'], '2026-11-22');
+    // Both classes return the same lessons here, so each appears once with both classes.
+    expect(week.lessons, hasLength(5));
+    expect(week.lessons.first.classes.map((c) => c.name), ['1AHIT', '2AHIT']);
+    expect(calls().where((c) => c == '/WebUntis/api/token/new'), hasLength(1)); // token reused
+
+    expect((await repo.cachedClasses(monday))!.lessons, week.lessons);
+    final count = server.requests.length;
+    now = now.add(const Duration(hours: 5));
+    await repo.refreshClasses(monday);
+    expect(server.requests, hasLength(count));
+    now = now.add(const Duration(hours: 2));
+    await repo.refreshClasses(monday);
+    expect(server.requests.length, greaterThan(count));
+  });
+
   test('mondayOf', () {
     expect(mondayOf(DateTime(2026, 11, 29, 23)), _monday);
     expect(mondayOf(_monday), _monday);

@@ -284,6 +284,60 @@ abstract class AppLocalizations {
   /// **'statt {name}'**
   String insteadOf(String name);
 
+  /// No description provided for @teacherSearch.
+  ///
+  /// In de, this message translates to:
+  /// **'Lehrer suchen'**
+  String get teacherSearch;
+
+  /// No description provided for @teacherSearchHint.
+  ///
+  /// In de, this message translates to:
+  /// **'Name oder Kürzel'**
+  String get teacherSearchHint;
+
+  /// No description provided for @myTimetable.
+  ///
+  /// In de, this message translates to:
+  /// **'Mein Stundenplan'**
+  String get myTimetable;
+
+  /// No description provided for @addFavourite.
+  ///
+  /// In de, this message translates to:
+  /// **'Zu Favoriten'**
+  String get addFavourite;
+
+  /// No description provided for @removeFavourite.
+  ///
+  /// In de, this message translates to:
+  /// **'Aus Favoriten entfernen'**
+  String get removeFavourite;
+
+  /// No description provided for @loadingClasses.
+  ///
+  /// In de, this message translates to:
+  /// **'Lade alle Klassen-Stundenpläne. Das dauert pro Woche beim ersten Mal kurz.'**
+  String get loadingClasses;
+
+  /// No description provided for @noTeachersFound.
+  ///
+  /// In de, this message translates to:
+  /// **'Keine Lehrkraft gefunden.'**
+  String get noTeachersFound;
+
+  /// No description provided for @favouritesLabel.
+  ///
+  /// In de, this message translates to:
+  /// **'Favoriten'**
+  String get favouritesLabel;
+
+  /// No description provided for @allTeachersLabel.
+  ///
+  /// In de, this message translates to:
+  /// **'Alle Lehrkräfte'**
+  String get allTeachersLabel;
+
   /// No description provided for @retry.
   ///
   /// In de, this message translates to:

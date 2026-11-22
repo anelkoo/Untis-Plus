@@ -12,6 +12,8 @@ const TimetableTarget me = (type: 0, id: 0);
 
 DateTime mondayOf(DateTime d) => DateTime(d.year, d.month, d.day - (d.weekday - 1));
 int untisDate(DateTime d) => d.year * 10000 + d.month * 100 + d.day;
+String isoDate(DateTime d) =>
+    '${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
 
 class Week {
   const Week(this.lessons, this.fetchedAt, [this.refreshError]);
@@ -103,4 +105,64 @@ class TimetableRepository {
       return const [];
     }
   }
+
+  static const _classesKey = 'classes';
+
+  /// Every class's lessons in the week, from the cache; null if never loaded.
+  Future<Week?> cachedClasses(DateTime monday) async {
+    final row = await (_db.select(_db.cachedWeeks)
+          ..where((r) => r.target.equals(_classesKey) & r.monday.equals(untisDate(monday))))
+        .getSingleOrNull();
+    return row == null ? null : Week(_parseClasses(jsonDecode(row.json) as Map), row.fetchedAt);
+  }
+
+  /// Loads every class's week through the REST view, the only place students see other
+  /// classes' teachers; teacher timetables are filtered from it. That is one request per
+  /// class, so it only runs on demand and when the stored copy is older than [minAge].
+  Future<Week> refreshClasses(DateTime monday, {Duration minAge = const Duration(hours: 6)}) async {
+    final old = await cachedClasses(monday);
+    if (old != null && _now().difference(old.fetchedAt) < minAge) return old;
+
+    final config = await _client.getRest('/WebUntis/api/public/timetable/weekly/pageconfig', {
+      'type': '1',
+      'date': isoDate(monday),
+    });
+    final classes = [
+      for (final e in config['data']['elements'] as List)
+        {'id': e['id'], 'name': e['name'], 'longName': e['longName'] ?? ''},
+    ];
+    final weeks = <String, dynamic>{};
+    // A few at a time, to go easy on the school server.
+    for (var i = 0; i < classes.length; i += 4) {
+      await Future.wait([
+        for (final c in classes.skip(i).take(4))
+          _client.getRest('/WebUntis/api/rest/view/v1/timetable/entries', {
+            'start': isoDate(monday),
+            'end': isoDate(monday.add(const Duration(days: 6))),
+            'format': '1',
+            'resourceType': 'CLASS',
+            'resources': '${c['id']}',
+            'timetableType': 'STANDARD',
+          }).then((json) => weeks['${c['id']}'] = json),
+      ]);
+    }
+
+    final data = {'classes': classes, 'weeks': weeks};
+    final now = _now();
+    await _db.into(_db.cachedWeeks).insertOnConflictUpdate(CachedWeeksCompanion.insert(
+          target: _classesKey,
+          monday: untisDate(monday),
+          json: jsonEncode(data),
+          fetchedAt: now,
+        ));
+    return Week(_parseClasses(data), now);
+  }
+
+  static List<Lesson> _parseClasses(Map<dynamic, dynamic> data) => mergeClassLessons([
+        for (final c in data['classes'] as List)
+          ...parseRestWeek(
+            (data['weeks']['${c['id']}'] as Map).cast<String, dynamic>(),
+            Named(id: (c['id'] as num).toInt(), name: '${c['name']}', longName: '${c['longName']}'),
+          ),
+      ]);
 }

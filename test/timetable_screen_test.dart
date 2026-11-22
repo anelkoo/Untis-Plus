@@ -26,13 +26,13 @@ class _StoredStore implements CredentialsStore {
 }
 
 /// Opens the app signed in, in German, on Monday 23.11.2026 at 08:00 (the fixture week).
-Future<FakeServer> _open(WidgetTester tester, {required double width}) async {
+Future<FakeServer> _open(WidgetTester tester, {required double width, DateTime? now}) async {
   tester.platformDispatcher.localesTestValue = const [Locale('de', 'AT')];
   addTearDown(tester.platformDispatcher.clearLocalesTestValue);
   tester.view.physicalSize = Size(width, 900);
   tester.view.devicePixelRatio = 1;
   addTearDown(tester.view.reset);
-  screen.clock = () => DateTime(2026, 11, 23, 8);
+  screen.clock = () => now ?? DateTime(2026, 11, 23, 8);
   addTearDown(() => screen.clock = DateTime.now);
 
   final server = FakeServer(schoolHandler);
@@ -93,5 +93,31 @@ void main() {
     await tester.tap(find.byTooltip('Nächste Woche'));
     await _settle(tester);
     expect(_startDate(server), 20261130);
+  });
+
+  testWidgets('teacher search: star a favourite, open their week with classes instead of teachers',
+      (tester) async {
+    await _open(tester, width: 1000, now: DateTime(2026, 11, 16, 8));
+    await tester.tap(find.byTooltip('Lehrer suchen'));
+    await _settle(tester);
+    expect(find.text('Moser'), findsOneWidget);
+    expect(find.text('Leitner'), findsNothing); // replaced, not teaching
+
+    await tester.tap(find.descendant(of: find.widgetWithText(ListTile, 'Moser'), matching: find.byTooltip('Zu Favoriten')));
+    await _settle(tester);
+    expect(find.text('Favoriten'), findsOneWidget);
+    await tester.enterText(find.byType(TextField), 'jed');
+    await tester.pumpAndSettle();
+    expect(find.text('Moser'), findsNothing);
+    await tester.tap(find.text('Jedinger'));
+    await _settle(tester);
+
+    expect(find.text('Jedinger (JEDA)'), findsOneWidget);
+    expect(find.textContaining('1M\n1AHIT, 2AHIT', findRichText: true), findsOneWidget);
+    expect(find.textContaining('E1', findRichText: true), findsNothing); // Moser's lesson
+
+    await tester.tap(find.byTooltip('Mein Stundenplan'));
+    await _settle(tester);
+    expect(find.text('Jedinger (JEDA)'), findsNothing);
   });
 }

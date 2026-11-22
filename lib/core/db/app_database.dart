@@ -15,12 +15,28 @@ class CachedWeeks extends Table {
   Set<Column> get primaryKey => {target, monday};
 }
 
-@DriftDatabase(tables: [CachedWeeks])
+/// Teachers starred in the teacher search, by short name.
+class FavouriteTeachers extends Table {
+  TextColumn get name => text()();
+  TextColumn get longName => text()();
+
+  @override
+  Set<Column> get primaryKey => {name};
+}
+
+@DriftDatabase(tables: [CachedWeeks, FavouriteTeachers])
 class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? executor]) : super(executor ?? driftDatabase(name: 'untis_plus'));
 
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
+
+  @override
+  MigrationStrategy get migration => MigrationStrategy(
+        onUpgrade: (m, from, to) async {
+          if (from < 2) await m.createTable(favouriteTeachers);
+        },
+      );
 }
 
 @Riverpod(keepAlive: true)

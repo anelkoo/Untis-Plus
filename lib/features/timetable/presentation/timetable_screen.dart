@@ -6,7 +6,9 @@ import '../../../core/errors/failure_text.dart';
 import '../../../core/l10n/app_localizations.dart';
 import '../../auth/presentation/auth_providers.dart';
 import '../data/timetable_repository.dart';
+import '../domain/lesson.dart';
 import 'day_view.dart';
+import 'teacher_picker.dart';
 import 'timetable_providers.dart';
 import 'week_view.dart';
 
@@ -31,6 +33,7 @@ class _TimetableScreenState extends ConsumerState<TimetableScreen> {
   bool? _weekMode; // null until the screen width picks a default
   late PageController _pager;
   int _page = _anchor;
+  Named? _teacher; // null: my own timetable
 
   DateTime _weekAt(int page) => DateTime(_baseMonday.year, _baseMonday.month, _baseMonday.day + 7 * (page - _anchor));
 
@@ -104,6 +107,14 @@ class _TimetableScreenState extends ConsumerState<TimetableScreen> {
         ),
         actions: [
           IconButton(
+            tooltip: l.teacherSearch,
+            icon: const Icon(Icons.person_search_outlined),
+            onPressed: () async {
+              final teacher = await showTeacherPicker(context, mondayOf(_shownDay));
+              if (teacher != null) setState(() => _teacher = teacher);
+            },
+          ),
+          IconButton(
             tooltip: l.signOut,
             icon: const Icon(Icons.logout),
             onPressed: () => ref.read(authProvider.notifier).logout(),
@@ -111,51 +122,72 @@ class _TimetableScreenState extends ConsumerState<TimetableScreen> {
         ],
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(48),
-          child: Row(children: [
-            IconButton(
-              tooltip: weekMode ? l.previousWeek : l.previousDay,
-              icon: const Icon(Icons.chevron_left),
-              onPressed: () => _step(-1),
-            ),
-            Expanded(child: TextButton(onPressed: _pick, child: Text(label))),
-            IconButton(
-              tooltip: weekMode ? l.nextWeek : l.nextDay,
-              icon: const Icon(Icons.chevron_right),
-              onPressed: () => _step(1),
-            ),
-          ]),
+          child: Row(
+            children: [
+              IconButton(
+                tooltip: weekMode ? l.previousWeek : l.previousDay,
+                icon: const Icon(Icons.chevron_left),
+                onPressed: () => _step(-1),
+              ),
+              Expanded(
+                child: TextButton(onPressed: _pick, child: Text(label)),
+              ),
+              IconButton(
+                tooltip: weekMode ? l.nextWeek : l.nextDay,
+                icon: const Icon(Icons.chevron_right),
+                onPressed: () => _step(1),
+              ),
+            ],
+          ),
         ),
       ),
-      body: PageView.builder(
-        key: ObjectKey(_pager),
-        controller: _pager,
-        onPageChanged: (p) => setState(() => _page = p),
-        itemBuilder: (context, page) {
-          final day = weekMode ? _weekAt(page) : _dayAt(page);
-          return _WeekPage(monday: mondayOf(day), day: weekMode ? null : day);
-        },
+      body: Column(
+        children: [
+          if (_teacher case final teacher?)
+            Padding(
+              padding: const EdgeInsets.only(top: 4),
+              child: InputChip(
+                avatar: const Icon(Icons.person_outline),
+                label: Text(teacher.longName.isEmpty ? teacher.name : '${teacher.longName} (${teacher.name})'),
+                deleteButtonTooltipMessage: l.myTimetable,
+                onDeleted: () => setState(() => _teacher = null),
+              ),
+            ),
+          Expanded(
+            child: PageView.builder(
+              key: ObjectKey(_pager),
+              controller: _pager,
+              onPageChanged: (p) => setState(() => _page = p),
+              itemBuilder: (context, page) {
+                final day = weekMode ? _weekAt(page) : _dayAt(page);
+                return _WeekPage(monday: mondayOf(day), day: weekMode ? null : day, teacher: _teacher);
+              },
+            ),
+          ),
+        ],
       ),
     );
   }
 }
 
-/// Loads one week and shows it as a grid, or as the list of [day].
+/// Loads one week and shows it as a grid, or as the list of [day]: mine, or [teacher]'s
+/// (filtered from all class timetables).
 class _WeekPage extends ConsumerWidget {
-  const _WeekPage({required this.monday, this.day});
+  const _WeekPage({required this.monday, this.day, this.teacher});
 
   final DateTime monday;
   final DateTime? day;
+  final Named? teacher;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l = AppLocalizations.of(context);
-    final locale = Localizations.localeOf(context).toString();
-    final provider = weekProvider(me, monday);
-    final theme = Theme.of(context);
+    final teacher = this.teacher;
+    final provider = teacher == null ? weekProvider(me, monday) : classesWeekProvider(monday);
 
     Future<void> refresh() async {
       try {
-        await refreshWeek(ref, me, monday);
+        await (teacher == null ? refreshWeek(ref, me, monday) : refreshClassesWeek(ref, monday));
       } on Object catch (e) {
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(failureText(l, e))));
@@ -164,39 +196,65 @@ class _WeekPage extends ConsumerWidget {
     }
 
     return switch (ref.watch(provider)) {
-      AsyncValue(:final Week value) => Column(children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 4, 16, 0),
-            child: Text(
-              [
-                l.lastUpdated(DateFormat.Md(locale).add_Hm().format(value.fetchedAt)),
-                if (value.refreshError != null) failureText(l, value.refreshError!),
-              ].join(' · '),
-              style: theme.textTheme.labelSmall?.copyWith(
-                color: value.refreshError == null ? theme.colorScheme.onSurfaceVariant : theme.colorScheme.error,
-              ),
-            ),
-          ),
-          Expanded(
-            child: RefreshIndicator.adaptive(
-              onRefresh: refresh,
-              child: day == null
-                  ? WeekGrid(monday: monday, lessons: value.lessons, now: clock())
-                  : DayList(day: day!, lessons: value.lessons, now: clock()),
-            ),
-          ),
-        ]),
+      AsyncValue(:final Week value) => _content(context, ref, value, teacher, refresh),
       AsyncError(:final error) => Center(
-          child: Padding(
-            padding: const EdgeInsets.all(24),
-            child: Column(mainAxisSize: .min, children: [
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: .min,
+            children: [
               Text(failureText(l, error), textAlign: .center),
               const SizedBox(height: 16),
               FilledButton(onPressed: () => ref.invalidate(provider), child: Text(l.retry)),
-            ]),
+            ],
           ),
         ),
-      _ => const Center(child: CircularProgressIndicator.adaptive()),
+      ),
+      _ => Center(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: .min,
+            children: [
+              const CircularProgressIndicator.adaptive(),
+              if (teacher != null) ...[const SizedBox(height: 16), Text(l.loadingClasses, textAlign: .center)],
+            ],
+          ),
+        ),
+      ),
     };
+  }
+
+  Widget _content(BuildContext context, WidgetRef ref, Week value, Named? teacher, Future<void> Function() refresh) {
+    final l = AppLocalizations.of(context);
+    final locale = Localizations.localeOf(context).toString();
+    final theme = Theme.of(context);
+    final lessons = teacher == null
+        ? value.lessons
+        : value.lessons.where((x) => x.teachers.any((t) => t.name == teacher.name)).toList();
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 4, 16, 0),
+          child: Text(
+            [
+              l.lastUpdated(DateFormat.Md(locale).add_Hm().format(value.fetchedAt)),
+              if (value.refreshError != null) failureText(l, value.refreshError!),
+            ].join(' · '),
+            style: theme.textTheme.labelSmall?.copyWith(
+              color: value.refreshError == null ? theme.colorScheme.onSurfaceVariant : theme.colorScheme.error,
+            ),
+          ),
+        ),
+        Expanded(
+          child: RefreshIndicator.adaptive(
+            onRefresh: refresh,
+            child: day == null
+                ? WeekGrid(monday: monday, lessons: lessons, now: clock(), showClasses: teacher != null)
+                : DayList(day: day!, lessons: lessons, now: clock(), showClasses: teacher != null),
+          ),
+        ),
+      ],
+    );
   }
 }

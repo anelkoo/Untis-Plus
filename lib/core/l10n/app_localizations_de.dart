@@ -112,6 +112,34 @@ class AppLocalizationsDe extends AppLocalizations {
   }
 
   @override
+  String get teacherSearch => 'Lehrer suchen';
+
+  @override
+  String get teacherSearchHint => 'Name oder Kürzel';
+
+  @override
+  String get myTimetable => 'Mein Stundenplan';
+
+  @override
+  String get addFavourite => 'Zu Favoriten';
+
+  @override
+  String get removeFavourite => 'Aus Favoriten entfernen';
+
+  @override
+  String get loadingClasses =>
+      'Lade alle Klassen-Stundenpläne. Das dauert pro Woche beim ersten Mal kurz.';
+
+  @override
+  String get noTeachersFound => 'Keine Lehrkraft gefunden.';
+
+  @override
+  String get favouritesLabel => 'Favoriten';
+
+  @override
+  String get allTeachersLabel => 'Alle Lehrkräfte';
+
+  @override
   String get retry => 'Nochmal versuchen';
 
   @override

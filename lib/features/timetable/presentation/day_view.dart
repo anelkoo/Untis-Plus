@@ -8,9 +8,18 @@ import 'lesson_widgets.dart';
 
 /// One day as a list with full details; today starts with the Now/Next card.
 class DayList extends StatelessWidget {
-  const DayList({super.key, required this.day, required this.lessons, required this.now});
+  const DayList({
+    super.key,
+    required this.day,
+    required this.lessons,
+    required this.now,
+    this.showClasses = false,
+  });
 
   final DateTime day;
+
+  /// In a teacher's timetable, rows name the class instead of the teacher.
+  final bool showClasses;
   final List<Lesson> lessons;
   final DateTime now;
 
@@ -31,9 +40,9 @@ class DayList extends StatelessWidget {
               padding: const EdgeInsets.symmetric(vertical: 4),
               child: Column(children: [
                 if (nn.now case final current?)
-                  _NowNextRow(label: l.nowLabel, lesson: current, time: l.untilTime(DateFormat.Hm(locale).format(current.end))),
+                  _NowNextRow(showClasses: showClasses, label: l.nowLabel, lesson: current, time: l.untilTime(DateFormat.Hm(locale).format(current.end))),
                 if (nn.next case final next?)
-                  _NowNextRow(label: l.nextLabel, lesson: next, time: DateFormat.Hm(locale).format(next.start)),
+                  _NowNextRow(showClasses: showClasses, label: l.nextLabel, lesson: next, time: DateFormat.Hm(locale).format(next.start)),
               ]),
             ),
           ),
@@ -42,15 +51,16 @@ class DayList extends StatelessWidget {
             padding: const EdgeInsets.only(top: 48),
             child: Text(l.noLessonsDay, textAlign: .center, style: Theme.of(context).textTheme.bodyLarge),
           ),
-        for (final lesson in today) _LessonRow(lesson: lesson, locale: locale),
+        for (final lesson in today) _LessonRow(lesson: lesson, locale: locale, showClasses: showClasses),
       ],
     );
   }
 }
 
 class _NowNextRow extends StatelessWidget {
-  const _NowNextRow({required this.label, required this.lesson, required this.time});
+  const _NowNextRow({required this.label, required this.lesson, required this.time, required this.showClasses});
 
+  final bool showClasses;
   final String label;
   final Lesson lesson;
   final String time;
@@ -62,16 +72,17 @@ class _NowNextRow extends StatelessWidget {
       onTap: () => showLessonDetails(context, lesson),
       leading: SizedBox(width: 56, child: Text(label, style: text.labelLarge)),
       title: Text(lessonTitle(lesson, long: true), maxLines: 1, overflow: .ellipsis),
-      subtitle: Text([time, joinNames(lesson.rooms)].where((s) => s.isNotEmpty).join(' · ')),
+      subtitle: Text([time, joinNames(lesson.rooms), if (showClasses) joinNames(lesson.classes)].where((s) => s.isNotEmpty).join(' · ')),
     );
   }
 }
 
 class _LessonRow extends StatelessWidget {
-  const _LessonRow({required this.lesson, required this.locale});
+  const _LessonRow({required this.lesson, required this.locale, required this.showClasses});
 
   final Lesson lesson;
   final String locale;
+  final bool showClasses;
 
   @override
   Widget build(BuildContext context) {
@@ -82,7 +93,7 @@ class _LessonRow extends StatelessWidget {
     final cancelled = lesson.status == .cancelled;
     final details = [
       lesson.examType,
-      joinNames(lesson.teachers),
+      joinNames(showClasses ? lesson.classes : lesson.teachers),
       joinNames(lesson.rooms),
       ...{lesson.lessonText, lesson.substitutionText, lesson.info}.where((t) => t != lessonTitle(lesson)),
     ].where((s) => s.isNotEmpty).join(' · ');

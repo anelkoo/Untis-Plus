@@ -312,15 +312,237 @@ class CachedWeeksCompanion extends UpdateCompanion<CachedWeek> {
   }
 }
 
+class $FavouriteTeachersTable extends FavouriteTeachers
+    with TableInfo<$FavouriteTeachersTable, FavouriteTeacher> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $FavouriteTeachersTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  @override
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+    'name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _longNameMeta = const VerificationMeta(
+    'longName',
+  );
+  @override
+  late final GeneratedColumn<String> longName = GeneratedColumn<String>(
+    'long_name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [name, longName];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'favourite_teachers';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<FavouriteTeacher> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('name')) {
+      context.handle(
+        _nameMeta,
+        name.isAcceptableOrUnknown(data['name']!, _nameMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_nameMeta);
+    }
+    if (data.containsKey('long_name')) {
+      context.handle(
+        _longNameMeta,
+        longName.isAcceptableOrUnknown(data['long_name']!, _longNameMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_longNameMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {name};
+  @override
+  FavouriteTeacher map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return FavouriteTeacher(
+      name: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}name'],
+      )!,
+      longName: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}long_name'],
+      )!,
+    );
+  }
+
+  @override
+  $FavouriteTeachersTable createAlias(String alias) {
+    return $FavouriteTeachersTable(attachedDatabase, alias);
+  }
+}
+
+class FavouriteTeacher extends DataClass
+    implements Insertable<FavouriteTeacher> {
+  final String name;
+  final String longName;
+  const FavouriteTeacher({required this.name, required this.longName});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['name'] = Variable<String>(name);
+    map['long_name'] = Variable<String>(longName);
+    return map;
+  }
+
+  FavouriteTeachersCompanion toCompanion(bool nullToAbsent) {
+    return FavouriteTeachersCompanion(
+      name: Value(name),
+      longName: Value(longName),
+    );
+  }
+
+  factory FavouriteTeacher.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return FavouriteTeacher(
+      name: serializer.fromJson<String>(json['name']),
+      longName: serializer.fromJson<String>(json['longName']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'name': serializer.toJson<String>(name),
+      'longName': serializer.toJson<String>(longName),
+    };
+  }
+
+  FavouriteTeacher copyWith({String? name, String? longName}) =>
+      FavouriteTeacher(
+        name: name ?? this.name,
+        longName: longName ?? this.longName,
+      );
+  FavouriteTeacher copyWithCompanion(FavouriteTeachersCompanion data) {
+    return FavouriteTeacher(
+      name: data.name.present ? data.name.value : this.name,
+      longName: data.longName.present ? data.longName.value : this.longName,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('FavouriteTeacher(')
+          ..write('name: $name, ')
+          ..write('longName: $longName')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(name, longName);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is FavouriteTeacher &&
+          other.name == this.name &&
+          other.longName == this.longName);
+}
+
+class FavouriteTeachersCompanion extends UpdateCompanion<FavouriteTeacher> {
+  final Value<String> name;
+  final Value<String> longName;
+  final Value<int> rowid;
+  const FavouriteTeachersCompanion({
+    this.name = const Value.absent(),
+    this.longName = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  FavouriteTeachersCompanion.insert({
+    required String name,
+    required String longName,
+    this.rowid = const Value.absent(),
+  }) : name = Value(name),
+       longName = Value(longName);
+  static Insertable<FavouriteTeacher> custom({
+    Expression<String>? name,
+    Expression<String>? longName,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (name != null) 'name': name,
+      if (longName != null) 'long_name': longName,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  FavouriteTeachersCompanion copyWith({
+    Value<String>? name,
+    Value<String>? longName,
+    Value<int>? rowid,
+  }) {
+    return FavouriteTeachersCompanion(
+      name: name ?? this.name,
+      longName: longName ?? this.longName,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (longName.present) {
+      map['long_name'] = Variable<String>(longName.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('FavouriteTeachersCompanion(')
+          ..write('name: $name, ')
+          ..write('longName: $longName, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
   late final $CachedWeeksTable cachedWeeks = $CachedWeeksTable(this);
+  late final $FavouriteTeachersTable favouriteTeachers =
+      $FavouriteTeachersTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
   @override
-  List<DatabaseSchemaEntity> get allSchemaEntities => [cachedWeeks];
+  List<DatabaseSchemaEntity> get allSchemaEntities => [
+    cachedWeeks,
+    favouriteTeachers,
+  ];
 }
 
 typedef $$CachedWeeksTableCreateCompanionBuilder =
@@ -513,12 +735,179 @@ typedef $$CachedWeeksTableProcessedTableManager =
       CachedWeek,
       PrefetchHooks Function()
     >;
+typedef $$FavouriteTeachersTableCreateCompanionBuilder =
+    FavouriteTeachersCompanion Function({
+      required String name,
+      required String longName,
+      Value<int> rowid,
+    });
+typedef $$FavouriteTeachersTableUpdateCompanionBuilder =
+    FavouriteTeachersCompanion Function({
+      Value<String> name,
+      Value<String> longName,
+      Value<int> rowid,
+    });
+
+class $$FavouriteTeachersTableFilterComposer
+    extends Composer<_$AppDatabase, $FavouriteTeachersTable> {
+  $$FavouriteTeachersTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get longName => $composableBuilder(
+    column: $table.longName,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$FavouriteTeachersTableOrderingComposer
+    extends Composer<_$AppDatabase, $FavouriteTeachersTable> {
+  $$FavouriteTeachersTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get longName => $composableBuilder(
+    column: $table.longName,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$FavouriteTeachersTableAnnotationComposer
+    extends Composer<_$AppDatabase, $FavouriteTeachersTable> {
+  $$FavouriteTeachersTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get name =>
+      $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumn<String> get longName =>
+      $composableBuilder(column: $table.longName, builder: (column) => column);
+}
+
+class $$FavouriteTeachersTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $FavouriteTeachersTable,
+          FavouriteTeacher,
+          $$FavouriteTeachersTableFilterComposer,
+          $$FavouriteTeachersTableOrderingComposer,
+          $$FavouriteTeachersTableAnnotationComposer,
+          $$FavouriteTeachersTableCreateCompanionBuilder,
+          $$FavouriteTeachersTableUpdateCompanionBuilder,
+          (
+            FavouriteTeacher,
+            BaseReferences<
+              _$AppDatabase,
+              $FavouriteTeachersTable,
+              FavouriteTeacher
+            >,
+          ),
+          FavouriteTeacher,
+          PrefetchHooks Function()
+        > {
+  $$FavouriteTeachersTableTableManager(
+    _$AppDatabase db,
+    $FavouriteTeachersTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$FavouriteTeachersTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$FavouriteTeachersTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$FavouriteTeachersTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<String> name = const Value.absent(),
+                Value<String> longName = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => FavouriteTeachersCompanion(
+                name: name,
+                longName: longName,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String name,
+                required String longName,
+                Value<int> rowid = const Value.absent(),
+              }) => FavouriteTeachersCompanion.insert(
+                name: name,
+                longName: longName,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$FavouriteTeachersTable, FavouriteTeacher>(table),
+                  BaseReferences<
+                    _$AppDatabase,
+                    $FavouriteTeachersTable,
+                    FavouriteTeacher
+                  >(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$FavouriteTeachersTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $FavouriteTeachersTable,
+      FavouriteTeacher,
+      $$FavouriteTeachersTableFilterComposer,
+      $$FavouriteTeachersTableOrderingComposer,
+      $$FavouriteTeachersTableAnnotationComposer,
+      $$FavouriteTeachersTableCreateCompanionBuilder,
+      $$FavouriteTeachersTableUpdateCompanionBuilder,
+      (
+        FavouriteTeacher,
+        BaseReferences<
+          _$AppDatabase,
+          $FavouriteTeachersTable,
+          FavouriteTeacher
+        >,
+      ),
+      FavouriteTeacher,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
   $AppDatabaseManager(this._db);
   $$CachedWeeksTableTableManager get cachedWeeks =>
       $$CachedWeeksTableTableManager(_db, _db.cachedWeeks);
+  $$FavouriteTeachersTableTableManager get favouriteTeachers =>
+      $$FavouriteTeachersTableTableManager(_db, _db.favouriteTeachers);
 }
 
 // **************************************************************************

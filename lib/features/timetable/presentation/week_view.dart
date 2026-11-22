@@ -11,9 +11,18 @@ import 'lesson_widgets.dart';
 /// Calendar-style week: one column per school day, lessons placed by their real times.
 /// Rows come from the lessons themselves, so no separate timegrid call is needed.
 class WeekGrid extends StatelessWidget {
-  const WeekGrid({super.key, required this.monday, required this.lessons, required this.now});
+  const WeekGrid({
+    super.key,
+    required this.monday,
+    required this.lessons,
+    required this.now,
+    this.showClasses = false,
+  });
 
   final DateTime monday;
+
+  /// In a teacher's timetable, cards name the class instead of the teacher.
+  final bool showClasses;
   final List<Lesson> lessons;
   final DateTime now;
 
@@ -88,7 +97,7 @@ class WeekGrid extends StatelessWidget {
                             height: math.max(y(p.lesson.end) - y(p.lesson.start) - 2, 18),
                             left: column.maxWidth / p.columns * p.column + 1,
                             width: column.maxWidth / p.columns - 2,
-                            child: _LessonCard(lesson: p.lesson, locale: locale),
+                            child: _LessonCard(lesson: p.lesson, locale: locale, showClasses: showClasses),
                           ),
                         if (today && minuteOf(now) > from && minuteOf(now) < to)
                           Positioned(
@@ -129,10 +138,11 @@ class _DayHeader extends StatelessWidget {
 }
 
 class _LessonCard extends StatelessWidget {
-  const _LessonCard({required this.lesson, required this.locale});
+  const _LessonCard({required this.lesson, required this.locale, required this.showClasses});
 
   final Lesson lesson;
   final String locale;
+  final bool showClasses;
 
   @override
   Widget build(BuildContext context) {
@@ -175,7 +185,7 @@ class _LessonCard extends StatelessWidget {
                     decoration: cancelled ? TextDecoration.lineThrough : null,
                   ),
                 ),
-                for (final line in [joinNames(lesson.rooms), joinNames(lesson.teachers)])
+                for (final line in [joinNames(lesson.rooms), joinNames(showClasses ? lesson.classes : lesson.teachers)])
                   if (line.isNotEmpty)
                     TextSpan(text: '\n$line', style: text.labelSmall?.copyWith(color: colors.foreground)),
               ]),

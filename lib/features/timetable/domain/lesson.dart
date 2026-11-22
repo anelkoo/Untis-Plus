@@ -113,3 +113,73 @@ List<Named> _names(Object? list) => [
           original: e['orgid'] == null ? null : '${e['orgname'] ?? ''}',
         ),
     ];
+
+/// Parses the REST timetable view (`/api/rest/view/v1/timetable/entries`) of one class. Unlike
+/// getTimetable it is open to students for other classes and includes teachers, which is
+/// what teacher timetables are built from. [klass] is added to every lesson's classes.
+List<Lesson> parseRestWeek(Map<String, dynamic> json, Named klass) => [
+      for (final day in (json['days'] as List?) ?? const [])
+        for (final entry in (day['gridEntries'] as List?) ?? const []) ?_tryParseRest(entry, klass),
+    ]..sort((a, b) => a.start.compareTo(b.start));
+
+Lesson? _tryParseRest(Object? e, Named klass) {
+  try {
+    final m = (e as Map).cast<String, dynamic>();
+    final byType = <String, List<Named>>{};
+    for (var i = 1; i <= 7; i++) {
+      for (final p in (m['position$i'] as List?) ?? const []) {
+        final current = p['current'] as Map?;
+        final removed = p['removed'] as Map?;
+        final shown = current ?? removed!;
+        byType.putIfAbsent('${shown['type']}', () => []).add(Named(
+              id: 0,
+              name: '${shown['shortName'] ?? ''}',
+              longName: '${shown['longName'] ?? ''}',
+              original: current != null && removed != null ? '${removed['shortName'] ?? ''}' : null,
+            ));
+      }
+    }
+    final classes = byType['CLASS'] ?? [];
+    final duration = m['duration'] as Map;
+    final status = '${m['status']}';
+    final type = '${m['type']}';
+    final replaced = byType.values.expand((l) => l).any((n) => n.original != null);
+    return Lesson(
+      id: ((m['ids'] as List).first as num).toInt(),
+      start: DateTime.parse('${duration['start']}'),
+      end: DateTime.parse('${duration['end']}'),
+      status: switch (status) {
+        'CANCELLED' => .cancelled,
+        _ when type == 'EXAM' => .exam,
+        _ when replaced => .substitution,
+        'REGULAR' when type == 'NORMAL_TEACHING_PERIOD' => .regular,
+        _ => .irregular,
+      },
+      subjects: byType['SUBJECT'] ?? const [],
+      teachers: byType['TEACHER'] ?? const [],
+      rooms: byType['ROOM'] ?? const [],
+      classes: [klass, ...classes.where((c) => c.name != klass.name)],
+      lessonText: '${m['lessonText'] ?? ''}',
+      substitutionText: '${m['substitutionText'] ?? ''}',
+      info: '${m['lessonInfo'] ?? ''}',
+    );
+  } on Object {
+    return null;
+  }
+}
+
+/// Joins the weeks of all classes. A lesson shared by several classes (same time, subject,
+/// teachers and rooms) appears once, listing all of them.
+List<Lesson> mergeClassLessons(Iterable<Lesson> lessons) {
+  final merged = <String, Lesson>{};
+  for (final l in lessons) {
+    final key = [l.start, l.end, joinNamesOf(l.subjects), joinNamesOf(l.teachers), joinNamesOf(l.rooms)].join('|');
+    final seen = merged[key];
+    merged[key] = seen == null
+        ? l
+        : seen.copyWith(classes: [...seen.classes, ...l.classes.where((c) => !seen.classes.any((s) => s.name == c.name))]);
+  }
+  return merged.values.toList()..sort((a, b) => a.start.compareTo(b.start));
+}
+
+String joinNamesOf(List<Named> names) => names.map((n) => n.name).join(',');

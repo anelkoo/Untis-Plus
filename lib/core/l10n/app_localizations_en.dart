@@ -111,6 +111,34 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get teacherSearch => 'Find a teacher';
+
+  @override
+  String get teacherSearchHint => 'Name or short name';
+
+  @override
+  String get myTimetable => 'My timetable';
+
+  @override
+  String get addFavourite => 'Add to favourites';
+
+  @override
+  String get removeFavourite => 'Remove from favourites';
+
+  @override
+  String get loadingClasses =>
+      'Loading every class timetable. This takes a moment the first time each week.';
+
+  @override
+  String get noTeachersFound => 'No teacher found.';
+
+  @override
+  String get favouritesLabel => 'Favourites';
+
+  @override
+  String get allTeachersLabel => 'All teachers';
+
+  @override
   String get retry => 'Try again';
 
   @override
