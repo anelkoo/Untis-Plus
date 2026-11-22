@@ -120,5 +120,15 @@ if ($otherClass) {
   }
 }
 
+# Homework and exams over a longer range (two weeks back, eight weeks ahead).
+$from = $monday.AddDays(-14).ToString('yyyyMMdd')
+$to = $monday.AddDays(56).ToString('yyyyMMdd')
+Save-Response 'homeworks.json' {
+  Get-Text "https://$Server/WebUntis/api/homeworks/lessons?startDate=$from&endDate=$to" $bearer
+}
+Save-Response 'exams_range.json' {
+  Get-Text "https://$Server/WebUntis/api/exams?startDate=$from&endDate=$to&klasseId=-1&withGrades=false" $bearer
+}
+
 try { Invoke-Rpc 'logout' @{} | Out-Null } catch {}
 Write-Host "Fertig. Dateien in $((Resolve-Path $out).Path)"
