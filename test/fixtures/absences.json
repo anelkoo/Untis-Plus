@@ -1,0 +1,5 @@
+{"data":{"absences":[
+{"id":1,"startDate":20261123,"endDate":20261123,"startTime":700,"endTime":1200,"createDate":0,"lastUpdate":0,"createdUser":"lehrer1","updatedUser":"lehrer2","reasonId":0,"reason":"","text":"","interruptions":[],"canEdit":false,"studentName":"Muster Max","excuseStatus":"Arztbestätigung vorgelegt","isExcused":true,"excuse":{"id":1,"text":"","excuseDate":20261125,"excuseStatus":"Arztbestätigung vorgelegt","isExcused":true,"userId":1,"username":"lehrer2"}},
+{"id":2,"startDate":20261124,"endDate":20261124,"startTime":800,"endTime":1100,"createDate":0,"lastUpdate":0,"createdUser":"lehrer1","updatedUser":"lehrer1","reasonId":0,"reason":"Verschlafen","text":"","interruptions":[],"canEdit":false,"studentName":"Muster Max","excuseStatus":null,"isExcused":false,"excuse":null},
+{"broken":true}
+],"absenceReasons":[],"excuseStatuses":null,"showAbsenceReasonChange":false,"showCreateAbsence":false}}

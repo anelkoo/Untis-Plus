@@ -17,6 +17,7 @@ class WeekGrid extends StatelessWidget {
     required this.lessons,
     required this.now,
     this.showClasses = false,
+    this.holidays = const [],
   });
 
   final DateTime monday;
@@ -25,6 +26,7 @@ class WeekGrid extends StatelessWidget {
   final bool showClasses;
   final List<Lesson> lessons;
   final DateTime now;
+  final List<Holiday> holidays;
 
   static const _headerHeight = 44.0; // estimate, only used to fit the grid to the screen
 
@@ -98,7 +100,33 @@ class WeekGrid extends StatelessWidget {
                     child: LayoutBuilder(builder: (context, column) {
                       final placed = layoutDay(lessons.where((l) => DateUtils.isSameDay(l.start, day)).toList());
                       final today = DateUtils.isSameDay(day, now);
+                      final holiday = holidayOn(holidays, day);
                       return Stack(children: [
+                        if (holiday != null)
+                          Positioned.fill(
+                            child: Container(
+                              margin: const EdgeInsets.symmetric(horizontal: 1),
+                              padding: const EdgeInsets.all(4),
+                              decoration: BoxDecoration(
+                                color: theme.colorScheme.surfaceContainerHigh,
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                              alignment: .topCenter,
+                              child: Text(
+                                holiday.name,
+                                textAlign: .center,
+                                style: theme.textTheme.labelMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+                              ),
+                            ),
+                          ),
+                        // A thin line at every full hour (8:00, 9:00, ...), behind the lessons.
+                        for (var m = (from + 59) ~/ 60 * 60; m <= to; m += 60)
+                          Positioned(
+                            top: (m - from) * scale,
+                            left: 0,
+                            right: 0,
+                            child: IgnorePointer(child: Container(height: 1, color: theme.colorScheme.outlineVariant)),
+                          ),
                         for (final p in placed)
                           Positioned(
                             top: y(p.lesson.start),

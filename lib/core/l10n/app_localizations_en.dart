@@ -139,6 +139,57 @@ class AppLocalizationsEn extends AppLocalizations {
   String get allTeachersLabel => 'All teachers';
 
   @override
+  String get roomSearch => 'Find a room';
+
+  @override
+  String get roomSearchHint => 'Room name';
+
+  @override
+  String get noRoomsFound => 'No room found.';
+
+  @override
+  String get allRoomsLabel => 'All rooms';
+
+  @override
+  String get absencesTitle => 'Absences';
+
+  @override
+  String absencesSummary(int lessons, int unexcused) {
+    return '$lessons missed lessons, $unexcused not excused';
+  }
+
+  @override
+  String absencesCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count absences',
+      one: '1 absence',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String absenceLessons(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count lessons',
+      one: '1 lesson',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get absencesNone => 'No absences this school year.';
+
+  @override
+  String get absenceExcused => 'Excused';
+
+  @override
+  String get absenceNotExcused => 'Not excused';
+
+  @override
   String get changesTitle => 'Timetable changed';
 
   @override

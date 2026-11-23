@@ -37,8 +37,14 @@ String rpcResult(Object result) => jsonEncode({'jsonrpc': '2.0', 'id': '1', 'res
 String schoolHandler(String method, RequestOptions _) => switch (method) {
       'authenticate' => fixture('authenticate_ok.json'),
       'getTimetable' => fixture('getTimetable_week.json'),
+      'getHolidays' => rpcResult([
+          {'id': 1, 'name': 'AT', 'longName': 'Autonomer Tag', 'startDate': 20261127, 'endDate': 20261127},
+          {'id': 2, 'name': 'Weihn', 'longName': 'Weihnachtsferien', 'startDate': 20261224, 'endDate': 20270106},
+        ]),
       '/WebUntis/api/token/new' => 'header.payload.signature',
       '/WebUntis/api/exams' => fixture('api_exams.json'),
+      'getCurrentSchoolyear' => rpcResult({'id': 23, 'name': '2026/2027', 'startDate': 20260914, 'endDate': 20270711}),
+      '/WebUntis/api/classreg/absences/students' => fixture('absences.json'),
       '/WebUntis/api/public/timetable/weekly/pageconfig' =>
         '{"data":{"elements":[{"type":1,"id":1074,"name":"1AHIT","longName":"1a Muster"},'
             '{"type":1,"id":1075,"name":"2AHIT","longName":"2a"}]}}',

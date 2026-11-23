@@ -16,6 +16,10 @@ import '../domain/lesson.dart';
       border: null,
     );
   }
+  // Exams must be impossible to miss: pure yellow with black text (19.6:1), in light and dark mode.
+  if (lesson.status == .exam) {
+    return (background: examYellow, foreground: Colors.black, accent: Colors.black, border: Colors.black);
+  }
   final subject = _subjectScheme(_subjectKey(lesson), scheme.brightness);
   return (
     background: subject.primaryContainer,
@@ -28,6 +32,8 @@ import '../domain/lesson.dart';
     },
   );
 }
+
+const examYellow = Color(0xFFFFFF00);
 
 String _subjectKey(Lesson l) => l.subjects.isEmpty ? l.lessonText : l.subjects.first.name;
 

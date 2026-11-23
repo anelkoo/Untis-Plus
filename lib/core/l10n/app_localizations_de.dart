@@ -140,6 +140,57 @@ class AppLocalizationsDe extends AppLocalizations {
   String get allTeachersLabel => 'Alle Lehrkräfte';
 
   @override
+  String get roomSearch => 'Raum suchen';
+
+  @override
+  String get roomSearchHint => 'Raumname';
+
+  @override
+  String get noRoomsFound => 'Kein Raum gefunden.';
+
+  @override
+  String get allRoomsLabel => 'Alle Räume';
+
+  @override
+  String get absencesTitle => 'Fehlstunden';
+
+  @override
+  String absencesSummary(int lessons, int unexcused) {
+    return '$lessons Fehlstunden, davon $unexcused nicht entschuldigt';
+  }
+
+  @override
+  String absencesCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Abwesenheiten',
+      one: '1 Abwesenheit',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String absenceLessons(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Stunden',
+      one: '1 Stunde',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get absencesNone => 'Keine Fehlstunden in diesem Schuljahr.';
+
+  @override
+  String get absenceExcused => 'Entschuldigt';
+
+  @override
+  String get absenceNotExcused => 'Nicht entschuldigt';
+
+  @override
   String get changesTitle => 'Stundenplan geändert';
 
   @override

@@ -57,9 +57,35 @@ Save-Response 'getExams.json' {
 $token = (Get-Text "https://$Server/WebUntis/api/token/new").Trim()
 if ($token -notmatch '^[\w-]+\.[\w-]+\.[\w-]+$') { Write-Host 'Kein API-Token bekommen; REST-Abfragen laufen ohne.'; $token = '' }
 $bearer = if ($token) { @{ Authorization = "Bearer $token" } } else { @{} }
+# First REST call on purpose: a later response seems to replace the session cookie.
+# Absences for the current school year (falls back to the last 12 months).
+Save-Response 'getCurrentSchoolyear.json' { Invoke-Rpc 'getCurrentSchoolyear' @{} }
+$yearFrom = $monday.AddMonths(-12).ToString('yyyyMMdd')
+$yearTo = $monday.AddDays(6).ToString('yyyyMMdd')
+try {
+  $year = (Get-Content (Join-Path $out 'getCurrentSchoolyear.json') -Raw | ConvertFrom-Json).result
+  if ($year.startDate) { $yearFrom = $year.startDate; $yearTo = $year.endDate }
+} catch {}
+Save-Response 'absences.json' {
+  Get-Text "https://$Server/WebUntis/api/classreg/absences/students?startDate=$yearFrom&endDate=$yearTo&studentId=$personId&excuseStatusId=-1" $bearer
+}
+
 Save-Response 'api_exams.json' {
   Get-Text "https://$Server/WebUntis/api/exams?startDate=$($monday.ToString('yyyyMMdd'))&endDate=$($sunday.ToString('yyyyMMdd'))&klasseId=-1&withGrades=false" $bearer
 }
+# These run before the public requests below, which seem to drop the login session.
+Save-Response 'getHolidays.json' { Invoke-Rpc 'getHolidays' @{} }
+
+# Homework and exams over a longer range (two weeks back, eight weeks ahead).
+$from = $monday.AddDays(-14).ToString('yyyyMMdd')
+$to = $monday.AddDays(56).ToString('yyyyMMdd')
+Save-Response 'homeworks.json' {
+  Get-Text "https://$Server/WebUntis/api/homeworks/lessons?startDate=$from&endDate=$to" $bearer
+}
+Save-Response 'exams_range.json' {
+  Get-Text "https://$Server/WebUntis/api/exams?startDate=$from&endDate=$to&klasseId=-1&withGrades=false" $bearer
+}
+
 Save-Response 'weekly_data.json' {
   Get-Text "https://$Server/WebUntis/api/public/timetable/weekly/data?elementType=$personType&elementId=$personId&date=$($monday.ToString('yyyy-MM-dd'))&formatId=1"
 }
@@ -118,16 +144,6 @@ if ($otherClass) {
   Save-Response 'class_rest_entries.json' {
     Get-Text "https://$Server/WebUntis/api/rest/view/v1/timetable/entries?start=$($monday.ToString('yyyy-MM-dd'))&end=$($sunday.ToString('yyyy-MM-dd'))&format=1&resourceType=CLASS&resources=$otherClass&timetableType=STANDARD" $bearer
   }
-}
-
-# Homework and exams over a longer range (two weeks back, eight weeks ahead).
-$from = $monday.AddDays(-14).ToString('yyyyMMdd')
-$to = $monday.AddDays(56).ToString('yyyyMMdd')
-Save-Response 'homeworks.json' {
-  Get-Text "https://$Server/WebUntis/api/homeworks/lessons?startDate=$from&endDate=$to" $bearer
-}
-Save-Response 'exams_range.json' {
-  Get-Text "https://$Server/WebUntis/api/exams?startDate=$from&endDate=$to&klasseId=-1&withGrades=false" $bearer
 }
 
 try { Invoke-Rpc 'logout' @{} | Out-Null } catch {}

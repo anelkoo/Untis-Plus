@@ -100,6 +100,32 @@ Lesson _parse(Map<String, dynamic> p) {
   );
 }
 
+/// A school holiday from `getHolidays`, by day: [start] and [end] are both included.
+typedef Holiday = ({String name, DateTime start, DateTime end});
+
+/// Parses a raw `getHolidays` result, skipping entries that don't parse.
+List<Holiday> parseHolidays(List<dynamic> raw) => [for (final h in raw) ?_tryHoliday(h)];
+
+Holiday? _tryHoliday(Object? h) {
+  try {
+    final m = h as Map;
+    final long = '${m['longName'] ?? ''}';
+    return (
+      name: long.isNotEmpty ? long : '${m['name'] ?? ''}',
+      start: _at((m['startDate'] as num).toInt(), 0),
+      end: _at((m['endDate'] as num).toInt(), 0),
+    );
+  } on Object {
+    return null;
+  }
+}
+
+/// The holiday that covers [day], if any.
+Holiday? holidayOn(List<Holiday> holidays, DateTime day) {
+  final d = DateTime(day.year, day.month, day.day);
+  return holidays.where((h) => !d.isBefore(h.start) && !d.isAfter(h.end)).firstOrNull;
+}
+
 /// WebUntis dates are ints like 20261123 and times ints like 755 (07:55). Local time.
 DateTime _at(int date, int hhmm) =>
     DateTime(date ~/ 10000, date ~/ 100 % 100, date % 100, hhmm ~/ 100, hhmm % 100);

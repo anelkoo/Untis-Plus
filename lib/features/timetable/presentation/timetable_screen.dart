@@ -1,12 +1,14 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:material_ui/material_ui.dart';
 
 import '../../../core/errors/failure_text.dart';
 import '../../../core/l10n/app_localizations.dart';
+import '../../absences/absences_screen.dart';
 import '../../auth/presentation/auth_providers.dart';
 import '../../background/background_refresh.dart';
 import '../../notifications/change_notifier.dart';
@@ -38,7 +40,8 @@ class _TimetableScreenState extends ConsumerState<TimetableScreen> {
   bool? _weekMode; // null until the screen width picks a default
   late PageController _pager;
   int _page = _anchor;
-  Named? _teacher; // null: my own timetable
+  // null: my own timetable; else a teacher's or a room's, filtered from all classes.
+  ({Named who, bool room})? _filter;
 
   DateTime _weekAt(int page) => DateTime(_baseMonday.year, _baseMonday.month, _baseMonday.day + 7 * (page - _anchor));
 
@@ -118,7 +121,18 @@ class _TimetableScreenState extends ConsumerState<TimetableScreen> {
         ? '${DateFormat.Md(locale).format(shown)} – ${DateFormat.Md(locale).format(shown.add(const Duration(days: 6)))}'
         : DateFormat.MMMEd(locale).format(shown);
 
-    return Scaffold(
+    // Keyboard: A/D and ←/→ go back and forward one page; W/S jump a whole week, also in the day view.
+    final week = weekMode ? 1 : 5;
+    return CallbackShortcuts(
+      bindings: {
+        const SingleActivator(LogicalKeyboardKey.keyA): () => _step(-1),
+        const SingleActivator(LogicalKeyboardKey.arrowLeft): () => _step(-1),
+        const SingleActivator(LogicalKeyboardKey.keyD): () => _step(1),
+        const SingleActivator(LogicalKeyboardKey.arrowRight): () => _step(1),
+        const SingleActivator(LogicalKeyboardKey.keyW): () => _step(-week),
+        const SingleActivator(LogicalKeyboardKey.keyS): () => _step(week),
+      },
+      child: Focus(autofocus: true, child: Scaffold(
       appBar: AppBar(
         title: SegmentedButton<bool>(
           showSelectedIcon: false,
@@ -135,7 +149,15 @@ class _TimetableScreenState extends ConsumerState<TimetableScreen> {
             icon: const Icon(Icons.person_search_outlined),
             onPressed: () async {
               final teacher = await showTeacherPicker(context, mondayOf(_shownDay));
-              if (teacher != null) setState(() => _teacher = teacher);
+              if (teacher != null) setState(() => _filter = (who: teacher, room: false));
+            },
+          ),
+          IconButton(
+            tooltip: l.roomSearch,
+            icon: const Icon(Icons.meeting_room_outlined),
+            onPressed: () async {
+              final room = await showTeacherPicker(context, mondayOf(_shownDay), rooms: true);
+              if (room != null) setState(() => _filter = (who: room, room: true));
             },
           ),
           PopupMenuButton<void Function()>(
@@ -151,6 +173,10 @@ class _TimetableScreenState extends ConsumerState<TimetableScreen> {
                   );
                 },
                 child: ListTile(leading: const Icon(Icons.notifications_outlined), title: Text(l.testNotification)),
+              ),
+              PopupMenuItem(
+                value: () => Navigator.push(context, MaterialPageRoute<void>(builder: (_) => const AbsencesScreen())),
+                child: ListTile(leading: const Icon(Icons.event_busy_outlined), title: Text(l.absencesTitle)),
               ),
               PopupMenuItem(
                 value: () async {
@@ -194,14 +220,16 @@ class _TimetableScreenState extends ConsumerState<TimetableScreen> {
       ),
       body: Column(
         children: [
-          if (_teacher case final teacher?)
+          if (_filter case (:final who, :final room))
             Padding(
               padding: const EdgeInsets.only(top: 4),
               child: InputChip(
-                avatar: const Icon(Icons.person_outline),
-                label: Text(teacher.longName.isEmpty ? teacher.name : '${teacher.longName} (${teacher.name})'),
+                avatar: Icon(room ? Icons.meeting_room_outlined : Icons.person_outline),
+                label: Text(
+                  who.longName.isEmpty || who.longName == who.name ? who.name : '${who.longName} (${who.name})',
+                ),
                 deleteButtonTooltipMessage: l.myTimetable,
-                onDeleted: () => setState(() => _teacher = null),
+                onDeleted: () => setState(() => _filter = null),
               ),
             ),
           Expanded(
@@ -211,29 +239,29 @@ class _TimetableScreenState extends ConsumerState<TimetableScreen> {
               onPageChanged: (p) => setState(() => _page = p),
               itemBuilder: (context, page) {
                 final day = weekMode ? _weekAt(page) : _dayAt(page);
-                return _WeekPage(monday: mondayOf(day), day: weekMode ? null : day, teacher: _teacher);
+                return _WeekPage(monday: mondayOf(day), day: weekMode ? null : day, filter: _filter);
               },
             ),
           ),
         ],
       ),
-    );
+    )));
   }
 }
 
-/// Loads one week and shows it as a grid, or as the list of [day]: mine, or [teacher]'s
-/// (filtered from all class timetables).
+/// Loads one week and shows it as a grid, or as the list of [day]: mine, or a teacher's or
+/// room's from [filter] (filtered from all class timetables).
 class _WeekPage extends ConsumerWidget {
-  const _WeekPage({required this.monday, this.day, this.teacher});
+  const _WeekPage({required this.monday, this.day, this.filter});
 
   final DateTime monday;
   final DateTime? day;
-  final Named? teacher;
+  final ({Named who, bool room})? filter;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l = AppLocalizations.of(context);
-    final teacher = this.teacher;
+    final teacher = filter;
     final provider = teacher == null ? weekProvider(me, monday) : classesWeekProvider(monday);
 
     Future<void> refresh() async {
@@ -276,13 +304,21 @@ class _WeekPage extends ConsumerWidget {
     };
   }
 
-  Widget _content(BuildContext context, WidgetRef ref, Week value, Named? teacher, Future<void> Function() refresh) {
+  Widget _content(
+    BuildContext context,
+    WidgetRef ref,
+    Week value,
+    ({Named who, bool room})? teacher,
+    Future<void> Function() refresh,
+  ) {
     final l = AppLocalizations.of(context);
     final locale = Localizations.localeOf(context).toString();
     final theme = Theme.of(context);
     final lessons = teacher == null
         ? value.lessons
-        : value.lessons.where((x) => x.teachers.any((t) => t.name == teacher.name)).toList();
+        : value.lessons
+            .where((x) => (teacher.room ? x.rooms : x.teachers).any((t) => t.name == teacher.who.name))
+            .toList();
     return Column(
       children: [
         Padding(
@@ -301,8 +337,20 @@ class _WeekPage extends ConsumerWidget {
           child: RefreshIndicator.adaptive(
             onRefresh: refresh,
             child: day == null
-                ? WeekGrid(monday: monday, lessons: lessons, now: clock(), showClasses: teacher != null)
-                : DayList(day: day!, lessons: lessons, now: clock(), showClasses: teacher != null),
+                ? WeekGrid(
+                    monday: monday,
+                    lessons: lessons,
+                    now: clock(),
+                    showClasses: teacher != null,
+                    holidays: value.holidays,
+                  )
+                : DayList(
+                    day: day!,
+                    lessons: lessons,
+                    now: clock(),
+                    showClasses: teacher != null,
+                    holidays: value.holidays,
+                  ),
           ),
         ),
       ],

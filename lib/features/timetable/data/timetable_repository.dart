@@ -17,10 +17,13 @@ String isoDate(DateTime d) =>
     '${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
 
 class Week {
-  const Week(this.lessons, this.fetchedAt, [this.refreshError]);
+  const Week(this.lessons, this.fetchedAt, [this.refreshError, this.holidays = const []]);
 
   final List<Lesson> lessons;
   final DateTime fetchedAt;
+
+  /// Holidays that touch this week; only filled for my own timetable.
+  final List<Holiday> holidays;
 
   /// Set when the cached copy is shown because fetching a newer one failed.
   final Object? refreshError;
@@ -49,7 +52,12 @@ class TimetableRepository {
     // Rows from before exams were cached hold only the period list.
     return data is List
         ? Week(parseLessons(data), row.fetchedAt)
-        : Week(parseLessons(data['periods'] as List, data['exams'] as List), row.fetchedAt);
+        : Week(
+            parseLessons(data['periods'] as List, data['exams'] as List),
+            row.fetchedAt,
+            null,
+            parseHolidays(data['holidays'] as List? ?? const []),
+          );
   }
 
   /// Fetches the week from the server unless the stored copy is younger than [minAge], so
@@ -66,6 +74,8 @@ class TimetableRepository {
     final element = target == me
         ? {'id': session.personId, 'type': session.personType}
         : {'id': target.id, 'type': target.type};
+    // Before getTimetable, so the timetable stays the last JSON-RPC call (tests read it).
+    final holidays = target == me ? await _holidays(monday) : const [];
     const fields = ['id', 'name', 'longname'];
     final raw = await _client.call('getTimetable', {
       'options': {
@@ -89,10 +99,10 @@ class TimetableRepository {
     await _db.into(_db.cachedWeeks).insertOnConflictUpdate(CachedWeeksCompanion.insert(
           target: _key(target),
           monday: untisDate(monday),
-          json: jsonEncode({'periods': raw, 'exams': exams}),
+          json: jsonEncode({'periods': raw, 'exams': exams, 'holidays': holidays}),
           fetchedAt: now,
         ));
-    final fresh = Week(parseLessons(raw, exams), now);
+    final fresh = Week(parseLessons(raw, exams), now, null, parseHolidays(holidays));
     // No stored copy means a first fetch: nothing to compare, so no flood of notifications.
     if (old != null && target == me && onChanges != null) {
       final changes = diffLessons(old.lessons, fresh.lessons, now);
@@ -112,6 +122,19 @@ class TimetableRepository {
         'withGrades': 'false',
       });
       return res['data']['exams'] as List;
+    } on Object {
+      return const [];
+    }
+  }
+
+  /// The raw holidays overlapping [monday]'s week. Best effort, like [_exams].
+  Future<List<dynamic>> _holidays(DateTime monday) async {
+    try {
+      final from = untisDate(monday), to = untisDate(monday.add(const Duration(days: 6)));
+      return [
+        for (final h in await _client.call('getHolidays') as List)
+          if ((h['startDate'] as num) <= to && (h['endDate'] as num) >= from) h,
+      ];
     } on Object {
       return const [];
     }

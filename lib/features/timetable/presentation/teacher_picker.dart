@@ -6,19 +6,22 @@ import '../../../core/l10n/app_localizations.dart';
 import '../domain/lesson.dart';
 import 'timetable_providers.dart';
 
-/// Sheet to pick a teacher: favourites first, then everyone teaching in [monday]'s week.
-Future<Named?> showTeacherPicker(BuildContext context, DateTime monday) => showModalBottomSheet<Named>(
+/// Sheet to pick a teacher: favourites first, then everyone teaching in [monday]'s week. With
+/// [rooms], it lists the rooms in use that week instead. shortcut: no favourites for rooms.
+Future<Named?> showTeacherPicker(BuildContext context, DateTime monday, {bool rooms = false}) =>
+    showModalBottomSheet<Named>(
       context: context,
       isScrollControlled: true,
       showDragHandle: true,
       useSafeArea: true,
-      builder: (context) => FractionallySizedBox(heightFactor: 0.9, child: _TeacherPicker(monday)),
+      builder: (context) => FractionallySizedBox(heightFactor: 0.9, child: _TeacherPicker(monday, rooms: rooms)),
     );
 
 class _TeacherPicker extends ConsumerStatefulWidget {
-  const _TeacherPicker(this.monday);
+  const _TeacherPicker(this.monday, {required this.rooms});
 
   final DateTime monday;
+  final bool rooms;
 
   @override
   ConsumerState<_TeacherPicker> createState() => _TeacherPickerState();
@@ -36,7 +39,8 @@ class _TeacherPickerState extends ConsumerState<_TeacherPicker> {
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
     final theme = Theme.of(context);
-    final favourites = ref.watch(favouriteTeachersProvider).value ?? const [];
+    final rooms = widget.rooms;
+    final favourites = rooms ? const <Named>[] : ref.watch(favouriteTeachersProvider).value ?? const [];
     final week = ref.watch(classesWeekProvider(widget.monday));
     final favouriteNames = {for (final f in favourites) f.name};
 
@@ -44,9 +48,10 @@ class _TeacherPickerState extends ConsumerState<_TeacherPicker> {
       final favourite = favouriteNames.contains(t.name);
       return ListTile(
         title: Text(t.longName.isEmpty ? t.name : t.longName),
-        subtitle: Text(t.name),
+        // Rooms often have the same long and short name; show it once.
+        subtitle: t.longName.isEmpty || t.longName == t.name ? null : Text(t.name),
         onTap: () => Navigator.pop(context, t),
-        trailing: IconButton(
+        trailing: rooms ? null : IconButton(
           tooltip: favourite ? l.removeFavourite : l.addFavourite,
           icon: Icon(favourite ? Icons.star : Icons.star_border),
           color: favourite ? theme.colorScheme.primary : null,
@@ -68,8 +73,8 @@ class _TeacherPickerState extends ConsumerState<_TeacherPicker> {
           autofocus: true,
           decoration: InputDecoration(
             prefixIcon: const Icon(Icons.search),
-            labelText: l.teacherSearch,
-            hintText: l.teacherSearchHint,
+            labelText: rooms ? l.roomSearch : l.teacherSearch,
+            hintText: rooms ? l.roomSearchHint : l.teacherSearchHint,
           ),
           onChanged: (q) => setState(() => _query = q),
         ),
@@ -81,14 +86,14 @@ class _TeacherPickerState extends ConsumerState<_TeacherPicker> {
             AsyncValue(:final value?) => () {
                 final all = {
                   for (final lesson in value.lessons)
-                    for (final t in lesson.teachers)
+                    for (final t in rooms ? lesson.rooms : lesson.teachers)
                       if (t.name.isNotEmpty) t.name: Named(id: 0, name: t.name, longName: t.longName),
                 }.values.where((t) => !favouriteNames.contains(t.name) && _matches(t)).toList()
-                  ..sort((a, b) => a.longName.compareTo(b.longName));
+                  ..sort((a, b) => (a.longName.isEmpty ? a.name : a.longName).compareTo(b.longName.isEmpty ? b.name : b.longName));
                 return [
-                  header(l.allTeachersLabel),
+                  header(rooms ? l.allRoomsLabel : l.allTeachersLabel),
                   if (all.isEmpty && shownFavourites.isEmpty)
-                    ListTile(title: Text(l.noTeachersFound)),
+                    ListTile(title: Text(rooms ? l.noRoomsFound : l.noTeachersFound)),
                   ...all.map(tile),
                 ];
               }(),

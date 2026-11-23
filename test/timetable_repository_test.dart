@@ -35,6 +35,14 @@ void main() {
           as Map)['params'] as Map)['options'] as Map<String, dynamic>;
   List<String> calls() => [for (final r in server.requests) r.data is Map ? (r.data as Map)['method'] as String : r.uri.path];
 
+  test('keeps only the holidays touching the week, also in the cache', () async {
+    final week = await repo.refresh(me, _monday);
+    expect(week.holidays.map((h) => h.name), ['Autonomer Tag']);
+    expect(holidayOn(week.holidays, DateTime(2026, 11, 27, 10))?.name, 'Autonomer Tag');
+    expect(holidayOn(week.holidays, DateTime(2026, 11, 26)), isNull);
+    expect((await repo.cached(me, _monday))!.holidays, week.holidays);
+  });
+
   test('fetches my week by person id, stores it, and reads it back offline', () async {
     expect(await repo.cached(me, _monday), isNull);
     final week = await repo.refresh(me, _monday);

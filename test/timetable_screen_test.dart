@@ -1,4 +1,5 @@
 import 'package:drift/native.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
@@ -76,6 +77,19 @@ void main() {
     expect(find.text('HUB (Huber)'), findsOneWidget);
   });
 
+  testWidgets('keyboard: D and arrow right go a week forward, S jumps a week', (tester) async {
+    final server = await _open(tester, width: 1000);
+    await tester.sendKeyEvent(LogicalKeyboardKey.keyD);
+    await _settle(tester);
+    expect(_startDate(server), 20261130);
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+    await _settle(tester);
+    expect(_startDate(server), 20261207);
+    await tester.sendKeyEvent(LogicalKeyboardKey.keyS);
+    await _settle(tester);
+    expect(_startDate(server), 20261214);
+  });
+
   testWidgets('phones open today as a list with Now/Next; arrows and swipes move by day', (tester) async {
     final server = await _open(tester, width: 400);
     expect(find.text('Jetzt'), findsOneWidget);
@@ -121,11 +135,40 @@ void main() {
     expect(find.text('Jedinger (JEDA)'), findsNothing);
   });
 
+  testWidgets('room search: open a room\'s week, filtered from all classes', (tester) async {
+    await _open(tester, width: 1000, now: DateTime(2026, 11, 16, 8));
+    await tester.tap(find.byTooltip('Raum suchen'));
+    await _settle(tester);
+    expect(find.text('1M'), findsOneWidget);
+    expect(find.byTooltip('Zu Favoriten'), findsNothing);
+
+    await tester.enterText(find.byType(TextField), 'turn');
+    await tester.pumpAndSettle();
+    expect(find.text('1M'), findsNothing);
+    await tester.tap(find.text('TURN2'));
+    await _settle(tester);
+
+    expect(find.widgetWithText(InputChip, 'TURN2'), findsOneWidget);
+    expect(find.textContaining('BSPK', findRichText: true), findsOneWidget);
+    expect(find.textContaining('E1', findRichText: true), findsNothing); // in room 1M
+  });
+
   testWidgets('the menu has the test notification and sign out', (tester) async {
     await _open(tester, width: 400);
     await tester.tap(find.byTooltip('Weitere Optionen'));
     await tester.pumpAndSettle();
     expect(find.text('Testbenachrichtigung senden'), findsOneWidget);
     expect(find.text('Abmelden'), findsOneWidget);
+  });
+
+  testWidgets('the menu opens the absences with missed lessons counted', (tester) async {
+    await _open(tester, width: 360); // narrow phone: the app bar with four actions must still fit
+    await tester.tap(find.byTooltip('Weitere Optionen'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Fehlstunden'));
+    await _settle(tester);
+    expect(find.text('4 Fehlstunden, davon 1 nicht entschuldigt'), findsOneWidget);
+    expect(find.textContaining('1 Stunde · Nicht entschuldigt · Verschlafen'), findsOneWidget);
+    expect(find.textContaining('3 Stunden · Arztbestätigung vorgelegt'), findsOneWidget);
   });
 }

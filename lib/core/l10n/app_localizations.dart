@@ -338,6 +338,72 @@ abstract class AppLocalizations {
   /// **'Alle Lehrkräfte'**
   String get allTeachersLabel;
 
+  /// No description provided for @roomSearch.
+  ///
+  /// In de, this message translates to:
+  /// **'Raum suchen'**
+  String get roomSearch;
+
+  /// No description provided for @roomSearchHint.
+  ///
+  /// In de, this message translates to:
+  /// **'Raumname'**
+  String get roomSearchHint;
+
+  /// No description provided for @noRoomsFound.
+  ///
+  /// In de, this message translates to:
+  /// **'Kein Raum gefunden.'**
+  String get noRoomsFound;
+
+  /// No description provided for @allRoomsLabel.
+  ///
+  /// In de, this message translates to:
+  /// **'Alle Räume'**
+  String get allRoomsLabel;
+
+  /// No description provided for @absencesTitle.
+  ///
+  /// In de, this message translates to:
+  /// **'Fehlstunden'**
+  String get absencesTitle;
+
+  /// No description provided for @absencesSummary.
+  ///
+  /// In de, this message translates to:
+  /// **'{lessons} Fehlstunden, davon {unexcused} nicht entschuldigt'**
+  String absencesSummary(int lessons, int unexcused);
+
+  /// No description provided for @absencesCount.
+  ///
+  /// In de, this message translates to:
+  /// **'{count, plural, =1{1 Abwesenheit} other{{count} Abwesenheiten}}'**
+  String absencesCount(int count);
+
+  /// No description provided for @absenceLessons.
+  ///
+  /// In de, this message translates to:
+  /// **'{count, plural, =1{1 Stunde} other{{count} Stunden}}'**
+  String absenceLessons(int count);
+
+  /// No description provided for @absencesNone.
+  ///
+  /// In de, this message translates to:
+  /// **'Keine Fehlstunden in diesem Schuljahr.'**
+  String get absencesNone;
+
+  /// No description provided for @absenceExcused.
+  ///
+  /// In de, this message translates to:
+  /// **'Entschuldigt'**
+  String get absenceExcused;
+
+  /// No description provided for @absenceNotExcused.
+  ///
+  /// In de, this message translates to:
+  /// **'Nicht entschuldigt'**
+  String get absenceNotExcused;
+
   /// No description provided for @changesTitle.
   ///
   /// In de, this message translates to:

@@ -15,6 +15,7 @@ sealed class AppFailure implements Exception {
       };
 
   factory AppFailure.fromDio(DioException e) => switch (e.type) {
+        .badResponse when e.response?.statusCode == 403 => const NoPermissionFailure(),
         .badResponse => ServerFailure(e.response?.statusCode, 'HTTP ${e.response?.statusCode}'),
         .cancel => ServerFailure(null, 'cancelled'),
         _ => const NetworkFailure(),

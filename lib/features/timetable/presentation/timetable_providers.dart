@@ -44,7 +44,7 @@ Stream<Week> _cachedThenFresh(Future<Week?> cachedWeek, Future<Week> Function() 
     yield await refresh();
   } on Object catch (e) {
     if (cached == null) rethrow;
-    yield Week(cached.lessons, cached.fetchedAt, e);
+    yield Week(cached.lessons, cached.fetchedAt, e, cached.holidays);
   }
 }
 

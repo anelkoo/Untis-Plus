@@ -14,6 +14,7 @@ class DayList extends StatelessWidget {
     required this.lessons,
     required this.now,
     this.showClasses = false,
+    this.holidays = const [],
   });
 
   final DateTime day;
@@ -22,10 +23,12 @@ class DayList extends StatelessWidget {
   final bool showClasses;
   final List<Lesson> lessons;
   final DateTime now;
+  final List<Holiday> holidays;
 
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
+    final holiday = holidayOn(holidays, day);
     final locale = Localizations.localeOf(context).toString();
     final today = lessons.where((x) => DateUtils.isSameDay(x.start, day)).toList();
     final nn = nowNext(today, now);
@@ -49,7 +52,13 @@ class DayList extends StatelessWidget {
         if (today.isEmpty)
           Padding(
             padding: const EdgeInsets.only(top: 48),
-            child: Text(l.noLessonsDay, textAlign: .center, style: Theme.of(context).textTheme.bodyLarge),
+            child: Column(children: [
+              if (holiday != null) ...[
+                Icon(Icons.beach_access_outlined, size: 40, color: Theme.of(context).colorScheme.primary),
+                const SizedBox(height: 8),
+              ],
+              Text(holiday?.name ?? l.noLessonsDay, textAlign: .center, style: Theme.of(context).textTheme.bodyLarge),
+            ]),
           ),
         for (final lesson in today) _LessonRow(lesson: lesson, locale: locale, showClasses: showClasses),
       ],
@@ -87,7 +96,15 @@ class _LessonRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
-    final theme = Theme.of(context);
+    final exam = lesson.status == .exam;
+    var theme = Theme.of(context);
+    // On the yellow exam background every text and icon turns black.
+    if (exam) {
+      theme = theme.copyWith(
+        colorScheme: theme.colorScheme.copyWith(onSurface: Colors.black, onSurfaceVariant: Colors.black),
+        textTheme: theme.textTheme.apply(bodyColor: Colors.black, displayColor: Colors.black),
+      );
+    }
     final colors = lessonColors(context, lesson);
     final status = lessonStatus(l, lesson);
     final cancelled = lesson.status == .cancelled;
@@ -102,11 +119,14 @@ class _LessonRow extends StatelessWidget {
       button: true,
       label: semanticsLabel(l, lesson, locale),
       excludeSemantics: true,
-      child: InkWell(
+      child: Material(
+        color: exam ? colors.background : Colors.transparent,
+        borderRadius: BorderRadius.circular(8),
+        child: InkWell(
         borderRadius: BorderRadius.circular(8),
         onTap: () => showLessonDetails(context, lesson),
         child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 8),
+          padding: EdgeInsets.symmetric(vertical: 8, horizontal: exam ? 8 : 0),
           child: IntrinsicHeight(
             child: Row(crossAxisAlignment: .stretch, children: [
               SizedBox(
@@ -152,7 +172,7 @@ class _LessonRow extends StatelessWidget {
             ]),
           ),
         ),
-      ),
+      )),
     );
   }
 }
