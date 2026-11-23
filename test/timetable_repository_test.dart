@@ -56,6 +56,16 @@ void main() {
     expect(cached.fetchedAt, now);
   });
 
+  test('stores the upcoming exams for the widget, at most once an hour', () async {
+    expect(await repo.cachedExams(), isEmpty);
+    await repo.refreshExams();
+    final exams = await repo.cachedExams();
+    expect(exams.map((e) => (e.subject, e.type, e.start)), [('D', 'SMÜP', DateTime(2026, 11, 23, 7, 55))]);
+    final before = server.requests.length;
+    await repo.refreshExams();
+    expect(server.requests.length, before);
+  });
+
   test('does not ask the server again within minAge', () async {
     await repo.refresh(me, _monday);
     final count = server.requests.length;

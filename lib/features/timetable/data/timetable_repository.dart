@@ -111,6 +111,39 @@ class TimetableRepository {
     return fresh;
   }
 
+  /// My exams from today on, stored as one row so the widgets can read them offline.
+  static const _examsKey = 'exams';
+
+  /// The stored exams list from [refreshExams], without any network call.
+  Future<List<Exam>> cachedExams() async {
+    final row = await (_db.select(_db.cachedWeeks)..where((r) => r.target.equals(_examsKey))).getSingleOrNull();
+    return row == null ? const [] : parseExams(jsonDecode(row.json) as List);
+  }
+
+  /// Fetches my exams for the next half year, at most every [minAge]. Best effort: on a
+  /// failure the stored list stays.
+  Future<void> refreshExams({Duration minAge = const Duration(hours: 1)}) async {
+    final row = await (_db.select(_db.cachedWeeks)..where((r) => r.target.equals(_examsKey))).getSingleOrNull();
+    final now = _now();
+    if (row != null && now.difference(row.fetchedAt) < minAge) return;
+    try {
+      final res = await _client.getRest('/WebUntis/api/exams', {
+        'startDate': '${untisDate(now)}',
+        'endDate': '${untisDate(now.add(const Duration(days: 183)))}',
+        'klasseId': '-1',
+        'withGrades': 'false',
+      });
+      await _db.into(_db.cachedWeeks).insertOnConflictUpdate(CachedWeeksCompanion.insert(
+            target: _examsKey,
+            monday: 0,
+            json: jsonEncode(res['data']['exams'] as List),
+            fetchedAt: now,
+          ));
+    } on Object {
+      // See above.
+    }
+  }
+
   /// This account's exams in the week. Best effort: without them the timetable is still right,
   /// only exams show as normal lessons.
   Future<List<dynamic>> _exams(DateTime monday) async {

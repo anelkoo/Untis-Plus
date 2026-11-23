@@ -458,6 +458,24 @@ abstract class AppLocalizations {
   /// **'Weitere Optionen'**
   String get moreOptions;
 
+  /// No description provided for @lookSameColor.
+  ///
+  /// In de, this message translates to:
+  /// **'Alle Stunden in einer Farbe'**
+  String get lookSameColor;
+
+  /// No description provided for @lookDayInWeek.
+  ///
+  /// In de, this message translates to:
+  /// **'Wochenansicht im Tages-Design'**
+  String get lookDayInWeek;
+
+  /// No description provided for @lookWeekInDay.
+  ///
+  /// In de, this message translates to:
+  /// **'Tagesansicht im Wochen-Design'**
+  String get lookWeekInDay;
+
   /// No description provided for @testNotification.
   ///
   /// In de, this message translates to:

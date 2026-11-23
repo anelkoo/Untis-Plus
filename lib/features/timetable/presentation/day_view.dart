@@ -2,6 +2,7 @@ import 'package:intl/intl.dart';
 import 'package:material_ui/material_ui.dart';
 
 import '../../../core/l10n/app_localizations.dart';
+import '../../../core/settings.dart';
 import '../domain/day_layout.dart';
 import '../domain/lesson.dart';
 import 'lesson_widgets.dart';
@@ -97,15 +98,18 @@ class _LessonRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
     final exam = lesson.status == .exam;
+    final colors = lessonColors(context, lesson);
+    // Exams always sit on yellow; with the week design every lesson sits on its colour.
+    final filled = exam || look.value.contains(Look.weekLookInDay);
     var theme = Theme.of(context);
-    // On the yellow exam background every text and icon turns black.
-    if (exam) {
+    // On a filled background every text and icon takes the card's text colour.
+    if (filled) {
+      final fg = colors.foreground;
       theme = theme.copyWith(
-        colorScheme: theme.colorScheme.copyWith(onSurface: Colors.black, onSurfaceVariant: Colors.black),
-        textTheme: theme.textTheme.apply(bodyColor: Colors.black, displayColor: Colors.black),
+        colorScheme: theme.colorScheme.copyWith(onSurface: fg, onSurfaceVariant: fg),
+        textTheme: theme.textTheme.apply(bodyColor: fg, displayColor: fg),
       );
     }
-    final colors = lessonColors(context, lesson);
     final status = lessonStatus(l, lesson);
     final cancelled = lesson.status == .cancelled;
     final details = [
@@ -120,13 +124,16 @@ class _LessonRow extends StatelessWidget {
       label: semanticsLabel(l, lesson, locale),
       excludeSemantics: true,
       child: Material(
-        color: exam ? colors.background : Colors.transparent,
-        borderRadius: BorderRadius.circular(8),
+        color: filled ? colors.background : Colors.transparent,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
+          side: filled && !exam && colors.border != null ? BorderSide(color: colors.border!, width: 2) : BorderSide.none,
+        ),
         child: InkWell(
         borderRadius: BorderRadius.circular(8),
         onTap: () => showLessonDetails(context, lesson),
         child: Padding(
-          padding: EdgeInsets.symmetric(vertical: 8, horizontal: exam ? 8 : 0),
+          padding: EdgeInsets.symmetric(vertical: 8, horizontal: filled ? 8 : 0),
           child: IntrinsicHeight(
             child: Row(crossAxisAlignment: .stretch, children: [
               SizedBox(

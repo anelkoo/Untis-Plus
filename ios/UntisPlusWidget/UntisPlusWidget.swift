@@ -115,6 +115,13 @@ private extension View {
 }
 
 @main
+struct UntisPlusWidgets: WidgetBundle {
+  var body: some Widget {
+    UntisPlusWidget()
+    NextExamWidget()
+  }
+}
+
 struct UntisPlusWidget: Widget {
   var body: some WidgetConfiguration {
     StaticConfiguration(kind: "UntisPlusWidget", provider: Provider()) { entry in
@@ -123,5 +130,63 @@ struct UntisPlusWidget: Widget {
     .configurationDisplayName(german ? "Stundenplan" : "Timetable")
     .description(german ? "Die aktuelle oder nächste Stunde." : "The current or next lesson.")
     .supportedFamilies([.systemSmall, .systemMedium])
+  }
+}
+
+/// The next test that hasn't ended (see publishWidgets in lib/features/widgets/widget_bridge.dart).
+struct ExamEntry: TimelineEntry {
+  let date: Date
+  let title: String
+  let when: String
+}
+
+struct ExamProvider: TimelineProvider {
+  private var sample: ExamEntry { ExamEntry(date: Date(), title: "D · SMÜP", when: german ? "Mo., 30. Nov. · 07:55" : "Mon, Nov 30 · 07:55") }
+
+  func placeholder(in context: Context) -> ExamEntry { sample }
+
+  func getSnapshot(in context: Context, completion: @escaping (ExamEntry) -> Void) {
+    completion(context.isPreview ? sample : entries().first!)
+  }
+
+  func getTimeline(in context: Context, completion: @escaping (Timeline<ExamEntry>) -> Void) {
+    completion(Timeline(entries: entries(), policy: .never))
+  }
+
+  /// One entry now, then one at each exam's end, so the widget moves on to the next test by itself.
+  private func entries() -> [ExamEntry] {
+    guard let json = UserDefaults(suiteName: AppGroup.id)?.string(forKey: "exams"),
+          let items = try? JSONSerialization.jsonObject(with: Data(json.utf8)) as? [[String: Any]]
+    else { return [ExamEntry(date: Date(), title: german ? "Öffne Untis+ einmal" : "Open Untis+ once", when: "")] }
+    let exams = items
+      .map { (end: Date(timeIntervalSince1970: (($0["end"] as? NSNumber)?.doubleValue ?? 0) / 1000),
+              title: $0["title"] as? String ?? "", when: $0["date"] as? String ?? "") }
+      .filter { $0.end > Date() }
+    var result = [ExamEntry]()
+    var from = Date()
+    for exam in exams {
+      result.append(ExamEntry(date: from, title: exam.title, when: exam.when))
+      from = exam.end
+    }
+    result.append(ExamEntry(date: from, title: german ? "Kein Test, kein Stress" : "No test, no stress", when: ""))
+    return result
+  }
+}
+
+struct NextExamWidget: Widget {
+  var body: some WidgetConfiguration {
+    StaticConfiguration(kind: "NextExamWidget", provider: ExamProvider()) { entry in
+      VStack(alignment: .leading, spacing: 2) {
+        Text(german ? "Nächster Test" : "Next test").font(.caption.bold()).foregroundStyle(.tint)
+        Text(entry.title).font(.title3.bold()).lineLimit(2)
+        if !entry.when.isEmpty { Text(entry.when).font(.subheadline) }
+        Spacer(minLength: 0)
+      }
+      .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+      .widgetBackground()
+    }
+    .configurationDisplayName(german ? "Nächster Test" : "Next test")
+    .description(german ? "Der nächste Test mit Datum." : "The next test with its date.")
+    .supportedFamilies([.systemSmall])
   }
 }

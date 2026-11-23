@@ -4,5 +4,8 @@
     <string name="widget_next_lesson_description">Die aktuelle oder nächste Stunde</string>
     <string name="widget_today_name">Heute</string>
     <string name="widget_today_description">Die aktuelle oder nächste Stunde und der Rest des Tages</string>
+    <string name="widget_next_exam_name">Nächster Test</string>
+    <string name="widget_next_exam_description">Der nächste Test mit Datum</string>
+    <string name="widget_no_exam">Kein Test, kein Stress</string>
     <string name="widget_open_app">Öffne Untis+ einmal</string>
 </resources>

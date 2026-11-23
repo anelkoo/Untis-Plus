@@ -24,6 +24,31 @@ class TodayWidget : HomeWidgetProvider() {
         render(context, manager, ids, data, R.layout.widget_today, withLater = true)
 }
 
+/** Small widget: the next test that hasn't ended, with its date. */
+class NextExamWidget : HomeWidgetProvider() {
+    override fun onUpdate(context: Context, manager: AppWidgetManager, ids: IntArray, data: SharedPreferences) {
+        // No list yet: the app hasn't run since install. An empty list: no tests coming up.
+        val exams = try {
+            data.getString("exams", null)?.let(::JSONArray)
+        } catch (e: Exception) {
+            null
+        }
+        val now = System.currentTimeMillis()
+        val next = exams?.let { list -> (0 until list.length()).map(list::getJSONObject).firstOrNull { it.getLong("end") > now } }
+        for (id in ids) {
+            val views = RemoteViews(context.packageName, R.layout.widget_next_exam)
+            views.setOnClickPendingIntent(R.id.widget_root, HomeWidgetLaunchIntent.getActivity(context, MainActivity::class.java))
+            views.setTextViewText(
+                R.id.widget_title,
+                next?.optString("title") ?: context.getString(if (exams == null) R.string.widget_open_app else R.string.widget_no_exam),
+            )
+            views.setTextViewText(R.id.widget_time, next?.optString("date") ?: "")
+            views.setViewVisibility(R.id.widget_time, if (next == null) View.GONE else View.VISIBLE)
+            manager.updateAppWidget(id, views)
+        }
+    }
+}
+
 /** The app writes a timeline (see widget_timeline.dart); show the last entry that has started. */
 private fun currentEntry(data: SharedPreferences): JSONObject? {
     val timeline = try {

@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:material_ui/material_ui.dart';
 
 import '../../../core/l10n/app_localizations.dart';
+import '../../../core/settings.dart';
 import '../domain/day_layout.dart';
 import '../domain/lesson.dart';
 import 'lesson_widgets.dart';
@@ -183,10 +184,20 @@ class _LessonCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
-    final colors = lessonColors(context, lesson);
+    var colors = lessonColors(context, lesson);
     final status = lessonStatus(l, lesson);
-    final text = Theme.of(context).textTheme;
+    final theme = Theme.of(context);
+    final text = theme.textTheme;
     final cancelled = lesson.status == .cancelled;
+    final bar = lesson.status != .exam && look.value.contains(Look.dayLookInWeek);
+    if (bar) {
+      colors = (
+        background: theme.colorScheme.surfaceContainerLow,
+        foreground: cancelled ? theme.colorScheme.onSurfaceVariant : theme.colorScheme.onSurface,
+        accent: colors.accent,
+        border: null,
+      );
+    }
     return Semantics(
       button: true,
       label: semanticsLabel(l, lesson, locale),
@@ -201,7 +212,8 @@ class _LessonCard extends StatelessWidget {
         child: InkWell(
           onTap: () => showLessonDetails(context, lesson),
           // One text block, clipped by the card, so short lessons can't overflow.
-          child: Padding(
+          child: Container(
+            decoration: bar ? BoxDecoration(border: Border(left: BorderSide(color: colors.accent, width: 4))) : null,
             padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
             child: Text.rich(
               TextSpan(children: [

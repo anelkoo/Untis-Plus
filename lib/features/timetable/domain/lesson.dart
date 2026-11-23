@@ -51,7 +51,13 @@ List<Lesson> parseLessons(List<dynamic> periods, [List<dynamic> exams = const []
   ]..sort((a, b) => a.start.compareTo(b.start));
 }
 
-({DateTime start, DateTime end, String type})? _tryExam(Object? e) {
+typedef Exam = ({DateTime start, DateTime end, String type, String subject});
+
+/// Raw `/api/exams` entries, sorted by start; odd entries are skipped.
+List<Exam> parseExams(List<dynamic> exams) =>
+    [for (final e in exams) ?_tryExam(e)]..sort((a, b) => a.start.compareTo(b.start));
+
+Exam? _tryExam(Object? e) {
   try {
     final m = e as Map;
     final date = (m['examDate'] as num).toInt();
@@ -59,6 +65,7 @@ List<Lesson> parseLessons(List<dynamic> periods, [List<dynamic> exams = const []
       start: _at(date, (m['startTime'] as num).toInt()),
       end: _at(date, (m['endTime'] as num).toInt()),
       type: '${m['examType'] ?? ''}',
+      subject: '${m['subject'] ?? m['name'] ?? ''}',
     );
   } on Object {
     return null;

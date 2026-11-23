@@ -229,6 +229,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get moreOptions => 'More options';
 
   @override
+  String get lookSameColor => 'One colour for all lessons';
+
+  @override
+  String get lookDayInWeek => 'Week view in the day design';
+
+  @override
+  String get lookWeekInDay => 'Day view in the week design';
+
+  @override
   String get testNotification => 'Send test notification';
 
   @override

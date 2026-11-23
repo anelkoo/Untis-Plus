@@ -230,6 +230,15 @@ class AppLocalizationsDe extends AppLocalizations {
   String get moreOptions => 'Weitere Optionen';
 
   @override
+  String get lookSameColor => 'Alle Stunden in einer Farbe';
+
+  @override
+  String get lookDayInWeek => 'Wochenansicht im Tages-Design';
+
+  @override
+  String get lookWeekInDay => 'Tagesansicht im Wochen-Design';
+
+  @override
   String get testNotification => 'Testbenachrichtigung senden';
 
   @override

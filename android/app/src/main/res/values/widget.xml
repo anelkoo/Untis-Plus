@@ -4,6 +4,9 @@
     <string name="widget_next_lesson_description">The current or next lesson</string>
     <string name="widget_today_name">Today</string>
     <string name="widget_today_description">The current or next lesson and the rest of the day</string>
+    <string name="widget_next_exam_name">Next test</string>
+    <string name="widget_next_exam_description">The next test with its date</string>
+    <string name="widget_no_exam">No test, no stress</string>
     <string name="widget_open_app">Open Untis+ once</string>
     <color name="widget_background">#FFF3F6FB</color>
     <color name="widget_text">#FF1A1C1E</color>

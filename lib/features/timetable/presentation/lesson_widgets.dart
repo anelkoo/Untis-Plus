@@ -2,6 +2,7 @@ import 'package:intl/intl.dart';
 import 'package:material_ui/material_ui.dart';
 
 import '../../../core/l10n/app_localizations.dart';
+import '../../../core/settings.dart';
 import '../domain/lesson.dart';
 
 /// Colours for a lesson card. Each subject gets its own stable hue; the container/on-container
@@ -20,7 +21,7 @@ import '../domain/lesson.dart';
   if (lesson.status == .exam) {
     return (background: examYellow, foreground: Colors.black, accent: Colors.black, border: Colors.black);
   }
-  final subject = _subjectScheme(_subjectKey(lesson), scheme.brightness);
+  final subject = look.value.contains(Look.sameColor) ? scheme : _subjectScheme(_subjectKey(lesson), scheme.brightness);
   return (
     background: subject.primaryContainer,
     foreground: subject.onPrimaryContainer,

@@ -8,6 +8,7 @@ import 'package:material_ui/material_ui.dart';
 
 import '../../../core/errors/failure_text.dart';
 import '../../../core/l10n/app_localizations.dart';
+import '../../../core/settings.dart';
 import '../../absences/absences_screen.dart';
 import '../../auth/presentation/auth_providers.dart';
 import '../../background/background_refresh.dart';
@@ -164,6 +165,17 @@ class _TimetableScreenState extends ConsumerState<TimetableScreen> {
             tooltip: l.moreOptions,
             onSelected: (action) => action(),
             itemBuilder: (context) => [
+              for (final (option, label) in [
+                (Look.sameColor, l.lookSameColor),
+                (Look.dayLookInWeek, l.lookDayInWeek),
+                (Look.weekLookInDay, l.lookWeekInDay),
+              ])
+                CheckedPopupMenuItem(
+                  checked: look.value.contains(option),
+                  value: () => toggleLook(option),
+                  child: Text(label),
+                ),
+              const PopupMenuDivider(),
               PopupMenuItem(
                 value: () async {
                   final sent = await sendTestNotification();
@@ -233,7 +245,8 @@ class _TimetableScreenState extends ConsumerState<TimetableScreen> {
               ),
             ),
           Expanded(
-            child: PageView.builder(
+            // Rebuilds the pages when a look toggle changes.
+            child: ListenableBuilder(listenable: look, builder: (context, _) => PageView.builder(
               key: ObjectKey(_pager),
               controller: _pager,
               onPageChanged: (p) => setState(() => _page = p),
@@ -241,7 +254,7 @@ class _TimetableScreenState extends ConsumerState<TimetableScreen> {
                 final day = weekMode ? _weekAt(page) : _dayAt(page);
                 return _WeekPage(monday: mondayOf(day), day: weekMode ? null : day, filter: _filter);
               },
-            ),
+            )),
           ),
         ],
       ),

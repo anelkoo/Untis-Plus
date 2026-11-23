@@ -26,6 +26,7 @@ Future<void> refreshMine(TimetableRepository repo, {required Duration minAge, Da
   for (final monday in {mondayOf(t), mondayOf(t.add(const Duration(days: 3)))}) {
     await repo.refresh(me, monday, minAge: minAge);
   }
+  await repo.refreshExams();
 }
 
 @pragma('vm:entry-point')
