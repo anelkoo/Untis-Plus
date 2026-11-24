@@ -10,6 +10,7 @@ import 'package:untis_plus/features/auth/data/credentials_store.dart';
 import 'package:untis_plus/features/auth/domain/credentials.dart';
 import 'package:untis_plus/features/auth/domain/school.dart';
 import 'package:untis_plus/features/auth/presentation/auth_providers.dart';
+import 'package:untis_plus/features/timetable/presentation/jump.dart';
 import 'package:untis_plus/features/timetable/presentation/timetable_screen.dart' as screen;
 
 import 'fake_server.dart';
@@ -76,6 +77,26 @@ void main() {
     expect(find.text('Buch mitnehmen'), findsOneWidget);
     expect(find.text('Prüfung · SMÜP'), findsOneWidget);
     expect(find.text('HUB (Huber)'), findsOneWidget);
+  });
+
+  testWidgets('a test opens its lesson in a popup on a wide window', (tester) async {
+    await _open(tester, width: 1000);
+    await tester.tap(find.text('Tests'));
+    await tester.pumpAndSettle();
+    timetableJump.value = (start: DateTime(2026, 11, 23, 7, 55), end: DateTime(2026, 11, 23, 8, 45), subject: 'Deutsch');
+    await _settle(tester);
+    expect(find.byType(Dialog), findsOneWidget);
+    expect(find.text('Buch mitnehmen'), findsOneWidget);
+  });
+
+  testWidgets('homework opens its lesson in a bottom sheet on a narrow window', (tester) async {
+    await _open(tester, width: 400);
+    await tester.tap(find.text('Hausübung'));
+    await tester.pumpAndSettle();
+    timetableJump.value = (start: DateTime(2026, 11, 23), end: null, subject: 'D');
+    await _settle(tester);
+    expect(find.byType(Dialog), findsNothing);
+    expect(find.text('Buch mitnehmen'), findsOneWidget);
   });
 
   testWidgets('keyboard: D and arrow right go a week forward, S jumps a week', (tester) async {

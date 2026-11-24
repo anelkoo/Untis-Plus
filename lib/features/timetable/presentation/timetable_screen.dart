@@ -15,6 +15,8 @@ import '../../notifications/change_notifier.dart';
 import '../data/timetable_repository.dart';
 import '../domain/lesson.dart';
 import 'day_view.dart';
+import 'jump.dart';
+import 'lesson_widgets.dart';
 import 'teacher_picker.dart';
 import 'timetable_providers.dart';
 import 'week_view.dart';
@@ -80,6 +82,7 @@ class _TimetableScreenState extends ConsumerState<TimetableScreen> {
   void initState() {
     super.initState();
     _minute;
+    timetableJump.addListener(_onJump);
     unawaited(requestNotificationPermission());
     // Back in the foreground: refresh (at most once a minute), which also notifies changes.
     _lifecycle = AppLifecycleListener(onResume: () => _refreshMine(const Duration(minutes: 1)));
@@ -89,10 +92,29 @@ class _TimetableScreenState extends ConsumerState<TimetableScreen> {
     }
   }
 
+  /// A test or homework entry was tapped: show its day and open the lesson.
+  Future<void> _onJump() async {
+    final jump = timetableJump.value;
+    if (jump == null || _weekMode == null) return;
+    timetableJump.value = null;
+    setState(() {
+      _filter = null;
+      _setMode(_weekMode!, day: jump.start);
+    });
+    try {
+      final week = await ref.read(weekProvider(me, mondayOf(jump.start)).future);
+      final lesson = lessonFor(jump, week.lessons);
+      if (mounted && lesson != null) showLessonDetails(context, lesson);
+    } on Object {
+      // The day is shown anyway.
+    }
+  }
+
   void _refreshMine(Duration minAge) => unawaited(refreshMineNow(ref, minAge: minAge).catchError((Object _) {}));
 
   @override
   void dispose() {
+    timetableJump.removeListener(_onJump);
     _lifecycle.dispose();
     _desktopTimer?.cancel();
     _minute.cancel();

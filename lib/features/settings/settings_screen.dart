@@ -1,5 +1,6 @@
 import 'package:material_ui/material_ui.dart';
 
+import '../../core/adaptive_sheet.dart';
 import '../../core/l10n/app_localizations.dart';
 import '../../core/settings.dart';
 import '../../core/theme/app_theme.dart';
@@ -88,11 +89,9 @@ class SettingsScreen extends StatelessWidget {
 Future<void> _pickColor(BuildContext context, Slot slot, String title, Color start) {
   final l = AppLocalizations.of(context);
   var hsv = HSVColor.fromColor(start);
-  return showModalBottomSheet<void>(
-    context: context,
-    showDragHandle: true,
-    isScrollControlled: true,
-    builder: (context) => StatefulBuilder(
+  return showAdaptiveSheet<void>(
+    context,
+    (context) => StatefulBuilder(
       builder: (context, setState) {
         final color = hsv.toColor();
         Widget slider(String label, double value, double max, ValueChanged<double> onChanged) => Row(children: [

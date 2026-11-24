@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 
 import '../../../core/errors/failure_text.dart';
+import '../../../core/adaptive_sheet.dart';
 import '../../../core/l10n/app_localizations.dart';
 import '../domain/lesson.dart';
 import 'timetable_providers.dart';
@@ -9,12 +10,9 @@ import 'timetable_providers.dart';
 /// Sheet to pick a teacher: favourites first, then everyone teaching in [monday]'s week. With
 /// [rooms], it lists the rooms in use that week instead. shortcut: no favourites for rooms.
 Future<Named?> showTeacherPicker(BuildContext context, DateTime monday, {bool rooms = false}) =>
-    showModalBottomSheet<Named>(
-      context: context,
-      isScrollControlled: true,
-      showDragHandle: true,
-      useSafeArea: true,
-      builder: (context) => FractionallySizedBox(heightFactor: 0.9, child: _TeacherPicker(monday, rooms: rooms)),
+    showAdaptiveSheet<Named>(
+      context,
+      (context) => FractionallySizedBox(heightFactor: 0.9, child: _TeacherPicker(monday, rooms: rooms)),
     );
 
 class _TeacherPicker extends ConsumerStatefulWidget {

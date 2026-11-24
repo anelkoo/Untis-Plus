@@ -4,8 +4,10 @@ import 'package:material_ui/material_ui.dart';
 
 import '../../core/db/app_database.dart';
 import '../../core/l10n/app_localizations.dart';
+import '../../core/striped_row.dart';
 import '../auth/presentation/auth_providers.dart';
 import '../more/more_drawer.dart';
+import '../timetable/presentation/jump.dart';
 import '../timetable/data/timetable_repository.dart';
 import '../timetable/domain/lesson.dart';
 
@@ -37,13 +39,18 @@ class ExamsScreen extends ConsumerWidget {
                 Text(l.testsNone, textAlign: .center, style: Theme.of(context).textTheme.bodyLarge),
               ])
             : ListView(children: [
-                for (final e in exams)
-                  ListTile(
-                    leading: const Icon(Icons.edit_note),
-                    title: Text(e.subject),
-                    subtitle: e.type.isEmpty ? null : Text(e.type),
-                    trailing: Text('${DateFormat.MMMEd(locale).format(e.start)}\n${DateFormat.Hm(locale).format(e.start)}',
-                        textAlign: .end),
+                for (final (i, e) in exams.indexed)
+                  stripedRow(
+                    context,
+                    i,
+                    ListTile(
+                      onTap: () => timetableJump.value = (start: e.start, end: e.end, subject: e.subject),
+                      leading: const Icon(Icons.edit_note),
+                      title: Text(e.subject),
+                      subtitle: e.type.isEmpty ? null : Text(e.type),
+                      trailing: Text('${DateFormat.MMMEd(locale).format(e.start)}\n${DateFormat.Hm(locale).format(e.start)}',
+                          textAlign: .end),
+                    ),
                   ),
               ]),
       ),

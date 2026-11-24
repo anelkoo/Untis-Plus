@@ -1,6 +1,7 @@
 import 'package:intl/intl.dart';
 import 'package:material_ui/material_ui.dart';
 
+import '../../../core/adaptive_sheet.dart';
 import '../../../core/l10n/app_localizations.dart';
 import '../../../core/settings.dart';
 import '../domain/lesson.dart';
@@ -130,11 +131,9 @@ void showLessonDetails(BuildContext context, Lesson lesson) {
       );
   Widget text(IconData icon, String value) => ListTile(leading: Icon(icon), title: Text(value));
 
-  showModalBottomSheet<void>(
-    context: context,
-    showDragHandle: true,
-    isScrollControlled: true,
-    builder: (context) => SafeArea(
+  showAdaptiveSheet<void>(
+    context,
+    (context) => SafeArea(
       child: ListView(
         shrinkWrap: true,
         padding: const EdgeInsets.only(bottom: 16),

@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.3.3 (2026-11-24)
+
+### Added
+- Tapping a test or a homework entry opens its lesson in the timetable.
+
+### Changed
+- Tests and homework rows have lines between them, and every second row is slightly darker.
+- The timetable is the middle tab of the bottom bar.
+- Lesson details, the colour picker and the teacher and room search open as a popup in a wide window and as a swipe-up sheet in a narrow one.
+- README lists the current features.
+
 ## 0.3.2 (2026-11-24)
 
 ### Added

@@ -5,8 +5,10 @@ import 'package:material_ui/material_ui.dart';
 import '../../core/db/app_database.dart';
 import '../../core/errors/failure_text.dart';
 import '../../core/l10n/app_localizations.dart';
+import '../../core/striped_row.dart';
 import '../auth/presentation/auth_providers.dart';
 import '../more/more_drawer.dart';
+import '../timetable/presentation/jump.dart';
 import '../timetable/data/timetable_repository.dart';
 import 'homework.dart';
 
@@ -81,16 +83,21 @@ class HomeworkScreen extends ConsumerWidget {
               ),
             ),
           ),
-          for (final h in items)
-            ListTile(
-              leading: Icon(h.done ? Icons.check_circle_outline : Icons.radio_button_unchecked),
-              title: Text(h.subject.isEmpty ? h.text : h.subject),
-              subtitle: Text(
-                [if (h.subject.isNotEmpty) h.text, h.teacher].where((s) => s.isNotEmpty).join('\n'),
-                maxLines: 4,
-                overflow: .ellipsis,
+          for (final (i, h) in items.indexed)
+            stripedRow(
+              context,
+              i,
+              ListTile(
+                onTap: () => timetableJump.value = (start: h.due, end: null, subject: h.subject),
+                leading: Icon(h.done ? Icons.check_circle_outline : Icons.radio_button_unchecked),
+                title: Text(h.subject.isEmpty ? h.text : h.subject),
+                subtitle: Text(
+                  [if (h.subject.isNotEmpty) h.text, h.teacher].where((s) => s.isNotEmpty).join('\n'),
+                  maxLines: 4,
+                  overflow: .ellipsis,
+                ),
+                trailing: Text(DateFormat.MMMEd(locale).format(h.due)),
               ),
-              trailing: Text(DateFormat.MMMEd(locale).format(h.due)),
             ),
         ],
     ]);
