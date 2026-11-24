@@ -7,5 +7,11 @@
     <string name="widget_next_exam_name">Nächster Test</string>
     <string name="widget_next_exam_description">Der nächste Test mit Datum</string>
     <string name="widget_no_exam">Kein Test, kein Stress</string>
+    <string name="widget_homework_tomorrow_name">Hausübung bis morgen</string>
+    <string name="widget_homework_tomorrow_description">Offene Hausübung bis morgen</string>
+    <string name="widget_homework_week_name">Hausübung diese Woche</string>
+    <string name="widget_homework_week_description">Offene Hausübung bis Ende der Woche</string>
+    <string name="widget_no_homework_tomorrow">Nichts bis morgen</string>
+    <string name="widget_no_homework_week">Nichts diese Woche</string>
     <string name="widget_open_app">Öffne Untis+ einmal</string>
 </resources>

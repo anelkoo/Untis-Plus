@@ -102,24 +102,8 @@ class WeekGrid extends StatelessWidget {
                       final placed = layoutDay(lessons.where((l) => DateUtils.isSameDay(l.start, day)).toList());
                       final today = DateUtils.isSameDay(day, now);
                       final holiday = holidayOn(holidays, day);
+                      final hc = holidayColors(context);
                       return Stack(children: [
-                        if (holiday != null)
-                          Positioned.fill(
-                            child: Container(
-                              margin: const EdgeInsets.symmetric(horizontal: 1),
-                              padding: const EdgeInsets.all(4),
-                              decoration: BoxDecoration(
-                                color: theme.colorScheme.surfaceContainerHigh,
-                                borderRadius: BorderRadius.circular(6),
-                              ),
-                              alignment: .topCenter,
-                              child: Text(
-                                holiday.name,
-                                textAlign: .center,
-                                style: theme.textTheme.labelMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant),
-                              ),
-                            ),
-                          ),
                         // A thin line at every full hour (8:00, 9:00, ...), behind the lessons.
                         for (var m = (from + 59) ~/ 60 * 60; m <= to; m += 60)
                           Positioned(
@@ -128,6 +112,23 @@ class WeekGrid extends StatelessWidget {
                             right: 0,
                             child: IgnorePointer(child: Container(height: 1, color: theme.colorScheme.outlineVariant)),
                           ),
+                        if (holiday != null)
+                          Positioned.fill(
+                            child: Container(
+                              margin: const EdgeInsets.symmetric(horizontal: 1),
+                              padding: const EdgeInsets.all(4),
+                              decoration: BoxDecoration(
+                                color: hc.background,
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                              alignment: .topCenter,
+                              child: Text(
+                                holiday.name,
+                                textAlign: .center,
+                                style: theme.textTheme.labelMedium?.copyWith(color: hc.foreground),
+                              ),
+                            ),
+                          ),
                         for (final p in placed)
                           Positioned(
                             top: y(p.lesson.start),
@@ -135,6 +136,26 @@ class WeekGrid extends StatelessWidget {
                             left: column.maxWidth / p.columns * p.column + 1,
                             width: column.maxWidth / p.columns - 2,
                             child: _LessonCard(lesson: p.lesson, locale: locale, showClasses: showClasses),
+                          ),
+                        // Everything before now is shaded: whole earlier days, and today down to the now line.
+                        if (day.isBefore(DateTime(now.year, now.month, now.day)) || today)
+                          Positioned(
+                            top: 0,
+                            left: 0,
+                            right: 0,
+                            height: today ? ((minuteOf(now) - from) * scale).clamp(0.0, height) : height,
+                            child: IgnorePointer(child: ColoredBox(color: theme.colorScheme.scrim.withValues(alpha: 0.35))),
+                          ),
+                        // Everything that is over (whole past days, today up to now) is veiled.
+                        if (DateUtils.dateOnly(day).isBefore(DateUtils.dateOnly(now)) || today)
+                          Positioned(
+                            top: 0,
+                            left: 0,
+                            right: 0,
+                            height: today ? y(now).clamp(0.0, height) : height,
+                            child: IgnorePointer(
+                              child: ColoredBox(color: theme.colorScheme.surface.withValues(alpha: 0.55)),
+                            ),
                           ),
                         if (today && minuteOf(now) > from && minuteOf(now) < to)
                           Positioned(
@@ -189,13 +210,14 @@ class _LessonCard extends StatelessWidget {
     final theme = Theme.of(context);
     final text = theme.textTheme;
     final cancelled = lesson.status == .cancelled;
-    final bar = lesson.status != .exam && look.value.contains(Look.dayLookInWeek);
+    final bar = !colors.solid && look.value.contains(Look.modernCards);
     if (bar) {
       colors = (
         background: theme.colorScheme.surfaceContainerLow,
         foreground: cancelled ? theme.colorScheme.onSurfaceVariant : theme.colorScheme.onSurface,
         accent: colors.accent,
         border: null,
+        solid: false,
       );
     }
     return Semantics(

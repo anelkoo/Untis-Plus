@@ -27,6 +27,11 @@ Future<void> refreshMine(TimetableRepository repo, {required Duration minAge, Da
     await repo.refresh(me, monday, minAge: minAge);
   }
   await repo.refreshExams();
+  try {
+    await repo.refreshHomework();
+  } on Object {
+    // Some schools don't share homework; the rest of the refresh is unaffected.
+  }
 }
 
 @pragma('vm:entry-point')

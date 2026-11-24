@@ -119,6 +119,8 @@ struct UntisPlusWidgets: WidgetBundle {
   var body: some Widget {
     UntisPlusWidget()
     NextExamWidget()
+    HomeworkTomorrowWidget()
+    HomeworkWeekWidget()
   }
 }
 
@@ -188,5 +190,86 @@ struct NextExamWidget: Widget {
     .configurationDisplayName(german ? "Nächster Test" : "Next test")
     .description(german ? "Der nächste Test mit Datum." : "The next test with its date.")
     .supportedFamilies([.systemSmall])
+  }
+}
+
+/// Open homework by tomorrow, or before next Monday (see publishWidgets in lib/features/widgets/widget_bridge.dart).
+struct HomeworkEntry: TimelineEntry {
+  let date: Date
+  let lines: [String]
+  let note: String
+}
+
+struct HomeworkProvider: TimelineProvider {
+  let week: Bool
+
+  func placeholder(in context: Context) -> HomeworkEntry {
+    HomeworkEntry(date: Date(), lines: [german ? "Mi · M: Aufgabe 4" : "Wed · Maths: task 4"], note: "")
+  }
+
+  func getSnapshot(in context: Context, completion: @escaping (HomeworkEntry) -> Void) {
+    completion(context.isPreview ? placeholder(in: context) : entry())
+  }
+
+  /// Refreshes at midnight, when "tomorrow" and "this week" move on.
+  func getTimeline(in context: Context, completion: @escaping (Timeline<HomeworkEntry>) -> Void) {
+    let cal = Calendar.current
+    let midnight = cal.date(byAdding: .day, value: 1, to: cal.startOfDay(for: Date()))!
+    completion(Timeline(entries: [entry()], policy: .after(midnight)))
+  }
+
+  private func entry() -> HomeworkEntry {
+    guard let json = UserDefaults(suiteName: AppGroup.id)?.string(forKey: "homework"),
+          let items = try? JSONSerialization.jsonObject(with: Data(json.utf8)) as? [[String: Any]]
+    else { return HomeworkEntry(date: Date(), lines: [], note: german ? "Öffne Untis+ einmal" : "Open Untis+ once") }
+    let cal = Calendar.current
+    let today = cal.startOfDay(for: Date())
+    let limit = week
+      ? cal.nextDate(after: today, matching: DateComponents(weekday: 2), matchingPolicy: .nextTime)!
+      : cal.date(byAdding: .day, value: 2, to: today)!
+    let lines = items
+      .filter { Date(timeIntervalSince1970: (($0["due"] as? NSNumber)?.doubleValue ?? 0) / 1000) < limit }
+      .prefix(6)
+      .map { "\($0["day"] as? String ?? "") · \($0["title"] as? String ?? "")" }
+    let none = week ? (german ? "Nichts diese Woche" : "Nothing due this week") : (german ? "Nichts bis morgen" : "Nothing due by tomorrow")
+    return HomeworkEntry(date: Date(), lines: Array(lines), note: lines.isEmpty ? none : "")
+  }
+}
+
+private struct HomeworkView: View {
+  let title: String
+  let entry: HomeworkEntry
+
+  var body: some View {
+    VStack(alignment: .leading, spacing: 2) {
+      Text(title).font(.caption.bold()).foregroundStyle(.tint)
+      ForEach(entry.lines, id: \.self) { Text($0).font(.subheadline).lineLimit(2) }
+      if !entry.note.isEmpty { Text(entry.note).font(.title3.bold()) }
+      Spacer(minLength: 0)
+    }
+    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+    .widgetBackground()
+  }
+}
+
+struct HomeworkTomorrowWidget: Widget {
+  var body: some WidgetConfiguration {
+    StaticConfiguration(kind: "HomeworkTomorrowWidget", provider: HomeworkProvider(week: false)) { entry in
+      HomeworkView(title: german ? "Hausübung bis morgen" : "Homework by tomorrow", entry: entry)
+    }
+    .configurationDisplayName(german ? "Hausübung bis morgen" : "Homework by tomorrow")
+    .description(german ? "Offene Hausübung bis morgen." : "Open homework due by tomorrow.")
+    .supportedFamilies([.systemSmall, .systemMedium])
+  }
+}
+
+struct HomeworkWeekWidget: Widget {
+  var body: some WidgetConfiguration {
+    StaticConfiguration(kind: "HomeworkWeekWidget", provider: HomeworkProvider(week: true)) { entry in
+      HomeworkView(title: german ? "Hausübung diese Woche" : "Homework this week", entry: entry)
+    }
+    .configurationDisplayName(german ? "Hausübung diese Woche" : "Homework this week")
+    .description(german ? "Offene Hausübung bis Ende der Woche." : "Open homework due this week.")
+    .supportedFamilies([.systemSmall, .systemMedium])
   }
 }

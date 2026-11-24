@@ -12,6 +12,6 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await initNotifications().catchError((Object _) {});
   unawaited(scheduleBackgroundRefresh());
-  await loadLook();
+  await loadSettings();
   runApp(const ProviderScope(child: UntisPlusApp()));
 }

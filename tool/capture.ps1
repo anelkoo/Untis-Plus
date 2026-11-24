@@ -86,6 +86,18 @@ Save-Response 'exams_range.json' {
   Get-Text "https://$Server/WebUntis/api/exams?startDate=$from&endDate=$to&klasseId=-1&withGrades=false" $bearer
 }
 
+# Not used by the app yet: messages of the day, the inbox and lesson topics. A 403 is normal when
+# the school doesn't share them; the file then shows which of these a school allows.
+Save-Response 'news.json' {
+  Get-Text "https://$Server/WebUntis/api/public/news/newsWidgetData?date=$($monday.ToString('yyyyMMdd'))" $bearer
+}
+Save-Response 'messages_inbox.json' {
+  Get-Text "https://$Server/WebUntis/api/rest/view/v1/messages" $bearer
+}
+Save-Response 'lessontopics.json' {
+  Get-Text "https://$Server/WebUntis/api/classreg/lessontopic?startDate=$from&endDate=$to&studentId=$personId" $bearer
+}
+
 Save-Response 'weekly_data.json' {
   Get-Text "https://$Server/WebUntis/api/public/timetable/weekly/data?elementType=$personType&elementId=$personId&date=$($monday.ToString('yyyy-MM-dd'))&formatId=1"
 }

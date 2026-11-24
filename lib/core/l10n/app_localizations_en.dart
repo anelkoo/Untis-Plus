@@ -232,20 +232,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get lookSameColor => 'One colour for all lessons';
 
   @override
-  String get lookDayInWeek => 'Week view in the day design';
-
-  @override
-  String get lookWeekInDay => 'Day view in the week design';
-
-  @override
-  String get testNotification => 'Send test notification';
-
-  @override
-  String get testNotificationSent =>
-      'Test notification sent. If nothing shows up, check the app\'s notification settings.';
-
-  @override
-  String get testNotificationFailed => 'Could not send a notification.';
+  String get lookModern =>
+      'Modern lesson design (stripe instead of filled cards)';
 
   @override
   String get widgetNoLessons => 'No lessons in the next days';
@@ -276,7 +264,97 @@ class AppLocalizationsEn extends AppLocalizations {
   String get statusIrregular => 'Changed';
 
   @override
+  String get statusRoomChange => 'Room change';
+
+  @override
+  String get settings => 'Settings';
+
+  @override
+  String get settingsLook => 'Appearance';
+
+  @override
+  String get settingsColors => 'Colours';
+
+  @override
+  String get settingsLessonColors => 'Lessons';
+
+  @override
+  String get colorAccent => 'App accent colour';
+
+  @override
+  String get colorExam => 'Exam';
+
+  @override
+  String get colorSubstitution => 'Substitution (teacher or subject)';
+
+  @override
+  String get colorRoomChange => 'Room change';
+
+  @override
+  String get colorCancelled => 'Cancelled';
+
+  @override
+  String get colorIrregular => 'Changed';
+
+  @override
+  String get colorHoliday => 'Holidays';
+
+  @override
+  String get colorDefault => 'Default';
+
+  @override
+  String get colorSample => 'Sample';
+
+  @override
+  String get colorHue => 'Hue';
+
+  @override
+  String get colorSaturation => 'Saturation';
+
+  @override
+  String get colorBrightness => 'Brightness';
+
+  @override
+  String get colorDone => 'Done';
+
+  @override
   String get statusExam => 'Exam';
+
+  @override
+  String get navTimetable => 'Timetable';
+
+  @override
+  String get navHomework => 'Homework';
+
+  @override
+  String get navTests => 'Tests';
+
+  @override
+  String get navMore => 'More';
+
+  @override
+  String get homeworkNone => 'No homework in sight.';
+
+  @override
+  String get homeworkOverdue => 'Overdue';
+
+  @override
+  String get homeworkToday => 'Today';
+
+  @override
+  String get homeworkTomorrow => 'Tomorrow';
+
+  @override
+  String get homeworkWeek => 'This week';
+
+  @override
+  String get homeworkLater => 'Later';
+
+  @override
+  String get homeworkDone => 'Done';
+
+  @override
+  String get testsNone => 'No tests in sight.';
 
   @override
   String get errorNetwork =>

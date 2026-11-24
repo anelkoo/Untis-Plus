@@ -7,19 +7,32 @@ import '../domain/lesson.dart';
 
 /// Colours for a lesson card. Each subject gets its own stable hue; the container/on-container
 /// pair from Material's tonal palette keeps the text readable in light and dark mode.
-({Color background, Color foreground, Color accent, Color? border}) lessonColors(BuildContext context, Lesson lesson) {
+/// [solid] is set when the whole card is one flat colour (exams, or a colour the user picked).
+({Color background, Color foreground, Color accent, Color? border, bool solid}) lessonColors(
+    BuildContext context, Lesson lesson) {
   final scheme = Theme.of(context).colorScheme;
+  final slot = switch (lesson.status) {
+    .regular => null,
+    .exam => Slot.exam,
+    .substitution => Slot.substitution,
+    .roomChange => Slot.roomChange,
+    .cancelled => Slot.cancelled,
+    .irregular => Slot.irregular,
+  };
+  // Exams must be impossible to miss: pure yellow with black text (19.6:1) unless the user chose another colour.
+  final fill = colors.value[slot] ?? (lesson.status == .exam ? examYellow : null);
+  if (fill != null) {
+    final fg = readableOn(fill);
+    return (background: fill, foreground: fg, accent: fg, border: lesson.status == .cancelled ? null : fg, solid: true);
+  }
   if (lesson.status == .cancelled) {
     return (
       background: scheme.surfaceContainerHighest,
       foreground: scheme.onSurfaceVariant,
       accent: scheme.outlineVariant,
       border: null,
+      solid: false,
     );
-  }
-  // Exams must be impossible to miss: pure yellow with black text (19.6:1), in light and dark mode.
-  if (lesson.status == .exam) {
-    return (background: examYellow, foreground: Colors.black, accent: Colors.black, border: Colors.black);
   }
   final subject = look.value.contains(Look.sameColor) ? scheme : _subjectScheme(_subjectKey(lesson), scheme.brightness);
   return (
@@ -27,11 +40,25 @@ import '../domain/lesson.dart';
     foreground: subject.onPrimaryContainer,
     accent: subject.primary,
     border: switch (lesson.status) {
-      .exam => scheme.error,
       .substitution || .irregular => scheme.tertiary,
+      .roomChange => scheme.secondary,
       _ => null,
     },
+    solid: false,
   );
+}
+
+/// Black or white, whichever reads better on [background].
+Color readableOn(Color background) =>
+    ThemeData.estimateBrightnessForColor(background) == Brightness.dark ? Colors.white : Colors.black;
+
+/// School holidays: a solid block, so lesson lines and the grid don't show through.
+({Color background, Color foreground}) holidayColors(BuildContext context) {
+  final scheme = Theme.of(context).colorScheme;
+  final custom = colors.value[Slot.holiday];
+  return custom != null
+      ? (background: custom, foreground: readableOn(custom))
+      : (background: scheme.tertiaryContainer, foreground: scheme.onTertiaryContainer);
 }
 
 const examYellow = Color(0xFFFFFF00);
@@ -54,6 +81,7 @@ ColorScheme _subjectScheme(String key, Brightness brightness) => _schemes.putIfA
       .regular => null,
       .cancelled => (icon: Icons.block, label: l.statusCancelled),
       .substitution => (icon: Icons.swap_horiz, label: l.statusSubstitution),
+      .roomChange => (icon: Icons.meeting_room_outlined, label: l.statusRoomChange),
       .irregular => (icon: Icons.info_outline, label: l.statusIrregular),
       .exam => (icon: Icons.assignment_outlined, label: l.statusExam),
     };

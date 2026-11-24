@@ -67,6 +67,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 padding: const EdgeInsets.all(24),
                 shrinkWrap: true,
                 children: [
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Image.asset('assets/icon.png', width: 72, height: 72, excludeFromSemantics: true),
+                  ),
+                  const SizedBox(height: 16),
                   Text(l.appTitle, style: theme.textTheme.displaySmall),
                   const SizedBox(height: 4),
                   Text(l.loginSubtitle, style: theme.textTheme.bodyLarge),

@@ -464,35 +464,11 @@ abstract class AppLocalizations {
   /// **'Alle Stunden in einer Farbe'**
   String get lookSameColor;
 
-  /// No description provided for @lookDayInWeek.
+  /// No description provided for @lookModern.
   ///
   /// In de, this message translates to:
-  /// **'Wochenansicht im Tages-Design'**
-  String get lookDayInWeek;
-
-  /// No description provided for @lookWeekInDay.
-  ///
-  /// In de, this message translates to:
-  /// **'Tagesansicht im Wochen-Design'**
-  String get lookWeekInDay;
-
-  /// No description provided for @testNotification.
-  ///
-  /// In de, this message translates to:
-  /// **'Testbenachrichtigung senden'**
-  String get testNotification;
-
-  /// No description provided for @testNotificationSent.
-  ///
-  /// In de, this message translates to:
-  /// **'Testbenachrichtigung gesendet. Falls nichts erscheint, prüf die Benachrichtigungs-Einstellungen der App.'**
-  String get testNotificationSent;
-
-  /// No description provided for @testNotificationFailed.
-  ///
-  /// In de, this message translates to:
-  /// **'Benachrichtigung konnte nicht gesendet werden.'**
-  String get testNotificationFailed;
+  /// **'Modernes Design für Stunden (Streifen statt Farbfläche)'**
+  String get lookModern;
 
   /// No description provided for @widgetNoLessons.
   ///
@@ -542,11 +518,191 @@ abstract class AppLocalizations {
   /// **'Geändert'**
   String get statusIrregular;
 
+  /// No description provided for @statusRoomChange.
+  ///
+  /// In de, this message translates to:
+  /// **'Raumänderung'**
+  String get statusRoomChange;
+
+  /// No description provided for @settings.
+  ///
+  /// In de, this message translates to:
+  /// **'Einstellungen'**
+  String get settings;
+
+  /// No description provided for @settingsLook.
+  ///
+  /// In de, this message translates to:
+  /// **'Darstellung'**
+  String get settingsLook;
+
+  /// No description provided for @settingsColors.
+  ///
+  /// In de, this message translates to:
+  /// **'Farben'**
+  String get settingsColors;
+
+  /// No description provided for @settingsLessonColors.
+  ///
+  /// In de, this message translates to:
+  /// **'Stunden'**
+  String get settingsLessonColors;
+
+  /// No description provided for @colorAccent.
+  ///
+  /// In de, this message translates to:
+  /// **'Akzentfarbe der App'**
+  String get colorAccent;
+
+  /// No description provided for @colorExam.
+  ///
+  /// In de, this message translates to:
+  /// **'Prüfung'**
+  String get colorExam;
+
+  /// No description provided for @colorSubstitution.
+  ///
+  /// In de, this message translates to:
+  /// **'Vertretung (Lehrer oder Fach)'**
+  String get colorSubstitution;
+
+  /// No description provided for @colorRoomChange.
+  ///
+  /// In de, this message translates to:
+  /// **'Raumänderung'**
+  String get colorRoomChange;
+
+  /// No description provided for @colorCancelled.
+  ///
+  /// In de, this message translates to:
+  /// **'Entfall'**
+  String get colorCancelled;
+
+  /// No description provided for @colorIrregular.
+  ///
+  /// In de, this message translates to:
+  /// **'Geändert'**
+  String get colorIrregular;
+
+  /// No description provided for @colorHoliday.
+  ///
+  /// In de, this message translates to:
+  /// **'Ferien'**
+  String get colorHoliday;
+
+  /// No description provided for @colorDefault.
+  ///
+  /// In de, this message translates to:
+  /// **'Standard'**
+  String get colorDefault;
+
+  /// No description provided for @colorSample.
+  ///
+  /// In de, this message translates to:
+  /// **'Beispiel'**
+  String get colorSample;
+
+  /// No description provided for @colorHue.
+  ///
+  /// In de, this message translates to:
+  /// **'Farbton'**
+  String get colorHue;
+
+  /// No description provided for @colorSaturation.
+  ///
+  /// In de, this message translates to:
+  /// **'Sättigung'**
+  String get colorSaturation;
+
+  /// No description provided for @colorBrightness.
+  ///
+  /// In de, this message translates to:
+  /// **'Helligkeit'**
+  String get colorBrightness;
+
+  /// No description provided for @colorDone.
+  ///
+  /// In de, this message translates to:
+  /// **'Fertig'**
+  String get colorDone;
+
   /// No description provided for @statusExam.
   ///
   /// In de, this message translates to:
   /// **'Prüfung'**
   String get statusExam;
+
+  /// No description provided for @navTimetable.
+  ///
+  /// In de, this message translates to:
+  /// **'Stundenplan'**
+  String get navTimetable;
+
+  /// No description provided for @navHomework.
+  ///
+  /// In de, this message translates to:
+  /// **'Hausübung'**
+  String get navHomework;
+
+  /// No description provided for @navTests.
+  ///
+  /// In de, this message translates to:
+  /// **'Tests'**
+  String get navTests;
+
+  /// No description provided for @navMore.
+  ///
+  /// In de, this message translates to:
+  /// **'Mehr'**
+  String get navMore;
+
+  /// No description provided for @homeworkNone.
+  ///
+  /// In de, this message translates to:
+  /// **'Keine Hausübung in Sicht.'**
+  String get homeworkNone;
+
+  /// No description provided for @homeworkOverdue.
+  ///
+  /// In de, this message translates to:
+  /// **'Überfällig'**
+  String get homeworkOverdue;
+
+  /// No description provided for @homeworkToday.
+  ///
+  /// In de, this message translates to:
+  /// **'Heute'**
+  String get homeworkToday;
+
+  /// No description provided for @homeworkTomorrow.
+  ///
+  /// In de, this message translates to:
+  /// **'Morgen'**
+  String get homeworkTomorrow;
+
+  /// No description provided for @homeworkWeek.
+  ///
+  /// In de, this message translates to:
+  /// **'Diese Woche'**
+  String get homeworkWeek;
+
+  /// No description provided for @homeworkLater.
+  ///
+  /// In de, this message translates to:
+  /// **'Später'**
+  String get homeworkLater;
+
+  /// No description provided for @homeworkDone.
+  ///
+  /// In de, this message translates to:
+  /// **'Erledigt'**
+  String get homeworkDone;
+
+  /// No description provided for @testsNone.
+  ///
+  /// In de, this message translates to:
+  /// **'Keine Tests in Sicht.'**
+  String get testsNone;
 
   /// No description provided for @errorNetwork.
   ///

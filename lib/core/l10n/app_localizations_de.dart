@@ -233,21 +233,8 @@ class AppLocalizationsDe extends AppLocalizations {
   String get lookSameColor => 'Alle Stunden in einer Farbe';
 
   @override
-  String get lookDayInWeek => 'Wochenansicht im Tages-Design';
-
-  @override
-  String get lookWeekInDay => 'Tagesansicht im Wochen-Design';
-
-  @override
-  String get testNotification => 'Testbenachrichtigung senden';
-
-  @override
-  String get testNotificationSent =>
-      'Testbenachrichtigung gesendet. Falls nichts erscheint, prüf die Benachrichtigungs-Einstellungen der App.';
-
-  @override
-  String get testNotificationFailed =>
-      'Benachrichtigung konnte nicht gesendet werden.';
+  String get lookModern =>
+      'Modernes Design für Stunden (Streifen statt Farbfläche)';
 
   @override
   String get widgetNoLessons => 'Keine Stunden in den nächsten Tagen';
@@ -278,7 +265,97 @@ class AppLocalizationsDe extends AppLocalizations {
   String get statusIrregular => 'Geändert';
 
   @override
+  String get statusRoomChange => 'Raumänderung';
+
+  @override
+  String get settings => 'Einstellungen';
+
+  @override
+  String get settingsLook => 'Darstellung';
+
+  @override
+  String get settingsColors => 'Farben';
+
+  @override
+  String get settingsLessonColors => 'Stunden';
+
+  @override
+  String get colorAccent => 'Akzentfarbe der App';
+
+  @override
+  String get colorExam => 'Prüfung';
+
+  @override
+  String get colorSubstitution => 'Vertretung (Lehrer oder Fach)';
+
+  @override
+  String get colorRoomChange => 'Raumänderung';
+
+  @override
+  String get colorCancelled => 'Entfall';
+
+  @override
+  String get colorIrregular => 'Geändert';
+
+  @override
+  String get colorHoliday => 'Ferien';
+
+  @override
+  String get colorDefault => 'Standard';
+
+  @override
+  String get colorSample => 'Beispiel';
+
+  @override
+  String get colorHue => 'Farbton';
+
+  @override
+  String get colorSaturation => 'Sättigung';
+
+  @override
+  String get colorBrightness => 'Helligkeit';
+
+  @override
+  String get colorDone => 'Fertig';
+
+  @override
   String get statusExam => 'Prüfung';
+
+  @override
+  String get navTimetable => 'Stundenplan';
+
+  @override
+  String get navHomework => 'Hausübung';
+
+  @override
+  String get navTests => 'Tests';
+
+  @override
+  String get navMore => 'Mehr';
+
+  @override
+  String get homeworkNone => 'Keine Hausübung in Sicht.';
+
+  @override
+  String get homeworkOverdue => 'Überfällig';
+
+  @override
+  String get homeworkToday => 'Heute';
+
+  @override
+  String get homeworkTomorrow => 'Morgen';
+
+  @override
+  String get homeworkWeek => 'Diese Woche';
+
+  @override
+  String get homeworkLater => 'Später';
+
+  @override
+  String get homeworkDone => 'Erledigt';
+
+  @override
+  String get testsNone => 'Keine Tests in Sicht.';
 
   @override
   String get errorNetwork =>

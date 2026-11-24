@@ -7,6 +7,12 @@
     <string name="widget_next_exam_name">Next test</string>
     <string name="widget_next_exam_description">The next test with its date</string>
     <string name="widget_no_exam">No test, no stress</string>
+    <string name="widget_homework_tomorrow_name">Homework by tomorrow</string>
+    <string name="widget_homework_tomorrow_description">Open homework due by tomorrow</string>
+    <string name="widget_homework_week_name">Homework this week</string>
+    <string name="widget_homework_week_description">Open homework due this week</string>
+    <string name="widget_no_homework_tomorrow">Nothing due by tomorrow</string>
+    <string name="widget_no_homework_week">Nothing due this week</string>
     <string name="widget_open_app">Open Untis+ once</string>
     <color name="widget_background">#FFF3F6FB</color>
     <color name="widget_text">#FF1A1C1E</color>

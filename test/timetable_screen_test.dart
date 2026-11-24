@@ -2,6 +2,7 @@ import 'package:drift/native.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:untis_plus/core/settings.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:untis_plus/app.dart';
 import 'package:untis_plus/core/db/app_database.dart';
@@ -153,17 +154,64 @@ void main() {
     expect(find.textContaining('E1', findRichText: true), findsNothing); // in room 1M
   });
 
-  testWidgets('the menu has the test notification and sign out', (tester) async {
+  testWidgets('day view: the running lesson shows progress, finished ones fade', (tester) async {
+    await _open(tester, width: 400, now: DateTime(2026, 11, 23, 8, 20)); // Deutsch 07:55-08:45 is running
+    expect(find.byType(LinearProgressIndicator), findsOneWidget);
+    await tester.pumpWidget(const SizedBox()); // fresh app for the second clock
+    await _open(tester, width: 400, now: DateTime(2026, 11, 23, 23));
+    expect(find.byType(LinearProgressIndicator), findsNothing);
+    expect(find.byType(Opacity), findsWidgets);
+  });
+
+  testWidgets('the bottom bar opens the homework and tests tabs', (tester) async {
     await _open(tester, width: 400);
-    await tester.tap(find.byTooltip('Weitere Optionen'));
+    for (final tab in ['Hausübung', 'Tests']) {
+      await tester.tap(find.text(tab));
+      await tester.pumpAndSettle();
+      expect(find.text(tab), findsNWidgets(2)); // bar label and app bar title
+    }
+  });
+
+  testWidgets('the menu has settings and sign out, no test notification', (tester) async {
+    await _open(tester, width: 400);
+    await tester.tap(find.text('Mehr'));
     await tester.pumpAndSettle();
-    expect(find.text('Testbenachrichtigung senden'), findsOneWidget);
+    expect(find.text('Testbenachrichtigung senden'), findsNothing);
+    expect(find.text('Einstellungen'), findsOneWidget);
     expect(find.text('Abmelden'), findsOneWidget);
+  });
+
+  testWidgets('settings: a picked colour replaces the default', (tester) async {
+    await _open(tester, width: 400);
+    await tester.tap(find.text('Mehr'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Einstellungen'));
+    await _settle(tester);
+    await tester.tap(find.text('Raumänderung'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Fertig'));
+    await tester.pumpAndSettle();
+    expect(colors.value.keys, [Slot.roomChange]);
+    colors.value = {};
+  });
+
+  testWidgets('settings: one switch picks the modern lesson design for day and week', (tester) async {
+    await _open(tester, width: 400);
+    await tester.tap(find.text('Mehr'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Einstellungen'));
+    await _settle(tester);
+    expect(find.textContaining('Tagesansicht'), findsNothing);
+    expect(find.textContaining('Wochenansicht'), findsNothing);
+    await tester.tap(find.text('Modernes Design für Stunden (Streifen statt Farbfläche)'));
+    await tester.pumpAndSettle();
+    expect(look.value, {Look.modernCards});
+    look.value = {};
   });
 
   testWidgets('the menu opens the absences with missed lessons counted', (tester) async {
     await _open(tester, width: 360); // narrow phone: the app bar with four actions must still fit
-    await tester.tap(find.byTooltip('Weitere Optionen'));
+    await tester.tap(find.text('Mehr'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Fehlstunden'));
     await _settle(tester);

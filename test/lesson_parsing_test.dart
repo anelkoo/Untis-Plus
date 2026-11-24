@@ -24,7 +24,7 @@ void main() {
     expect(status, {
       101: LessonStatus.regular,
       102: LessonStatus.cancelled,
-      103: LessonStatus.substitution, // room changed
+      103: LessonStatus.roomChange,
       104: LessonStatus.exam,
       105: LessonStatus.substitution, // other teacher
       106: LessonStatus.irregular,
@@ -52,6 +52,6 @@ void main() {
     expect(byId[101]!.status, LessonStatus.exam);
     expect(byId[101]!.examType, 'SMÜP');
     expect(byId[102]!.status, LessonStatus.cancelled);
-    expect(byId[103]!.status, LessonStatus.substitution); // starts as the exam ends
+    expect(byId[103]!.status, LessonStatus.roomChange); // starts as the exam ends
   });
 }

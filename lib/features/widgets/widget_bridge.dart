@@ -6,12 +6,19 @@ import 'package:home_widget/home_widget.dart';
 import 'package:intl/intl.dart';
 
 import '../../core/l10n/device_localizations.dart';
+import '../homework/homework.dart';
 import '../timetable/data/timetable_repository.dart';
 import 'widget_timeline.dart';
 
 /// Android AppWidgetProvider class names (android/app/src/main/kotlin/.../widget).
-const _androidWidgets = ['NextLessonWidget', 'TodayWidget', 'NextExamWidget'];
-const _iosWidgets = ['UntisPlusWidget', 'NextExamWidget'];
+const _androidWidgets = [
+  'NextLessonWidget',
+  'TodayWidget',
+  'NextExamWidget',
+  'HomeworkTomorrowWidget',
+  'HomeworkWeekWidget',
+];
+const _iosWidgets = ['UntisPlusWidget', 'NextExamWidget', 'HomeworkTomorrowWidget', 'HomeworkWeekWidget'];
 // SideStore may rename the app group when it signs the app; AppDelegate reads the real one.
 const _appGroupChannel = MethodChannel('untis_plus/app_group');
 
@@ -37,12 +44,24 @@ Future<void> publishWidgets(TimetableRepository repo, {DateTime? now}) async {
             'date': '${DateFormat.MMMEd(l.localeName).format(e.start)} · ${DateFormat.Hm(l.localeName).format(e.start)}',
           },
     ].take(20).toList();
-    await _save(jsonEncode(timeline.map(widgetEntryToJson).toList()), jsonEncode(exams));
+    // The homework widgets pick "by tomorrow" and "this week" themselves, so they move on at midnight.
+    final horizon = untisDate(DateTime(t.year, t.month, t.day + 14));
+    final homework = [
+      for (final h in await repo.cachedHomework() ?? const <Homework>[])
+        if (!h.done && untisDate(h.due) < horizon)
+          {
+            'due': h.due.millisecondsSinceEpoch,
+            'day': DateFormat.E(l.localeName).format(h.due),
+            'title': [h.subject, h.text.split('\n').first].where((s) => s.isNotEmpty).join(': '),
+          },
+    ].take(40).toList();
+    await _save(jsonEncode(timeline.map(widgetEntryToJson).toList()), jsonEncode(exams), jsonEncode(homework));
     if (Platform.isAndroid) {
-      // Wake the widgets at each lesson boundary and exam end (inexact, may be a few minutes late).
+      // Wake the widgets at each lesson boundary, exam end and midnight (inexact, may be a few minutes late).
       final times = [
         for (final e in timeline.skip(1)) DateTime.fromMillisecondsSinceEpoch(e.from),
         for (final e in exams) DateTime.fromMillisecondsSinceEpoch(e['end']! as int),
+        for (var d = 1; d <= 3; d++) DateTime(t.year, t.month, t.day + d),
       ]..sort();
       for (final name in _androidWidgets) {
         await HomeWidget.scheduleWidgetUpdates(times, androidName: name);
@@ -57,19 +76,20 @@ Future<void> publishWidgets(TimetableRepository repo, {DateTime? now}) async {
 Future<void> clearWidgets() async {
   if (!Platform.isAndroid && !Platform.isIOS) return;
   try {
-    await _save(null, null);
+    await _save(null, null, null);
   } on Object {
     // See publishWidgets.
   }
 }
 
-Future<void> _save(String? timeline, String? exams) async {
+Future<void> _save(String? timeline, String? exams, String? homework) async {
   if (Platform.isIOS) {
     final group = await _appGroupChannel.invokeMethod<String>('appGroup');
     await HomeWidget.setAppGroupId(group ?? 'group.at.anelkoo.untisPlus');
   }
   await HomeWidget.saveWidgetData<String>('timeline', timeline);
   await HomeWidget.saveWidgetData<String>('exams', exams);
+  await HomeWidget.saveWidgetData<String>('homework', homework);
   if (Platform.isIOS) {
     for (final name in _iosWidgets) {
       await HomeWidget.updateWidget(iOSName: name);

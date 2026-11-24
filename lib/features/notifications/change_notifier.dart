@@ -102,22 +102,3 @@ Future<bool> notifyChanges(List<LessonChange> changes) async {
     return false;
   }
 }
-
-/// A sample notification through the real path: tomorrow's first lesson cancelled, the second
-/// with a substitute.
-Future<bool> sendTestNotification() async {
-  await requestNotificationPermission();
-  final now = DateTime.now();
-  Lesson lesson(int id, int hour) => Lesson(
-        id: id,
-        start: DateTime(now.year, now.month, now.day + 1, hour),
-        end: DateTime(now.year, now.month, now.day + 1, hour, 50),
-        subjects: const [Named(id: 0, name: 'AM')],
-        teachers: const [Named(id: 0, name: 'MUE')],
-        rooms: const [Named(id: 0, name: 'E14')],
-      );
-  return notifyChanges([
-    (kind: ChangeKind.cancelled, lesson: lesson(1, 8)),
-    (kind: ChangeKind.substitution, lesson: lesson(2, 9)),
-  ]);
-}

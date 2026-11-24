@@ -9,8 +9,6 @@ import 'package:material_ui/material_ui.dart';
 import '../../../core/errors/failure_text.dart';
 import '../../../core/l10n/app_localizations.dart';
 import '../../../core/settings.dart';
-import '../../absences/absences_screen.dart';
-import '../../auth/presentation/auth_providers.dart';
 import '../../background/background_refresh.dart';
 import '../../notifications/change_notifier.dart';
 import '../data/timetable_repository.dart';
@@ -74,10 +72,13 @@ class _TimetableScreenState extends ConsumerState<TimetableScreen> {
 
   late final AppLifecycleListener _lifecycle;
   Timer? _desktopTimer;
+  // Moves the shading of past lessons along.
+  late final Timer _minute = Timer.periodic(const Duration(minutes: 1), (_) => setState(() {}));
 
   @override
   void initState() {
     super.initState();
+    _minute;
     unawaited(requestNotificationPermission());
     // Back in the foreground: refresh (at most once a minute), which also notifies changes.
     _lifecycle = AppLifecycleListener(onResume: () => _refreshMine(const Duration(minutes: 1)));
@@ -93,6 +94,7 @@ class _TimetableScreenState extends ConsumerState<TimetableScreen> {
   void dispose() {
     _lifecycle.dispose();
     _desktopTimer?.cancel();
+    _minute.cancel();
     if (_weekMode != null) _pager.dispose();
     super.dispose();
   }
@@ -161,53 +163,6 @@ class _TimetableScreenState extends ConsumerState<TimetableScreen> {
               if (room != null) setState(() => _filter = (who: room, room: true));
             },
           ),
-          PopupMenuButton<void Function()>(
-            tooltip: l.moreOptions,
-            onSelected: (action) => action(),
-            itemBuilder: (context) => [
-              for (final (option, label) in [
-                (Look.sameColor, l.lookSameColor),
-                (Look.dayLookInWeek, l.lookDayInWeek),
-                (Look.weekLookInDay, l.lookWeekInDay),
-              ])
-                CheckedPopupMenuItem(
-                  checked: look.value.contains(option),
-                  value: () => toggleLook(option),
-                  child: Text(label),
-                ),
-              const PopupMenuDivider(),
-              PopupMenuItem(
-                value: () async {
-                  final sent = await sendTestNotification();
-                  if (!context.mounted) return;
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text(sent ? l.testNotificationSent : l.testNotificationFailed)),
-                  );
-                },
-                child: ListTile(leading: const Icon(Icons.notifications_outlined), title: Text(l.testNotification)),
-              ),
-              PopupMenuItem(
-                value: () => Navigator.push(context, MaterialPageRoute<void>(builder: (_) => const AbsencesScreen())),
-                child: ListTile(leading: const Icon(Icons.event_busy_outlined), title: Text(l.absencesTitle)),
-              ),
-              PopupMenuItem(
-                value: () async {
-                  final messenger = ScaffoldMessenger.of(context);
-                  try {
-                    final path = await exportMyCalendar(ref);
-                    if (path != null) messenger.showSnackBar(SnackBar(content: Text(l.exportSaved(path))));
-                  } on Object catch (e) {
-                    messenger.showSnackBar(SnackBar(content: Text(l.exportFailed(failureText(l, e)))));
-                  }
-                },
-                child: ListTile(leading: const Icon(Icons.event_outlined), title: Text(l.exportCalendar)),
-              ),
-              PopupMenuItem(
-                value: () => ref.read(authProvider.notifier).logout(),
-                child: ListTile(leading: const Icon(Icons.logout), title: Text(l.signOut)),
-              ),
-            ],
-          ),
         ],
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(48),
@@ -245,8 +200,8 @@ class _TimetableScreenState extends ConsumerState<TimetableScreen> {
               ),
             ),
           Expanded(
-            // Rebuilds the pages when a look toggle changes.
-            child: ListenableBuilder(listenable: look, builder: (context, _) => PageView.builder(
+            // Rebuilds the pages when a look toggle or colour changes.
+            child: ListenableBuilder(listenable: Listenable.merge([look, colors]), builder: (context, _) => PageView.builder(
               key: ObjectKey(_pager),
               controller: _pager,
               onPageChanged: (p) => setState(() => _page = p),

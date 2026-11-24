@@ -11,6 +11,7 @@ import es.antonborri.home_widget.HomeWidgetLaunchIntent
 import es.antonborri.home_widget.HomeWidgetProvider
 import org.json.JSONArray
 import org.json.JSONObject
+import java.util.Calendar
 
 /** Small widget: the current or next lesson. */
 class NextLessonWidget : HomeWidgetProvider() {
@@ -46,6 +47,53 @@ class NextExamWidget : HomeWidgetProvider() {
             views.setViewVisibility(R.id.widget_time, if (next == null) View.GONE else View.VISIBLE)
             manager.updateAppWidget(id, views)
         }
+    }
+}
+
+/** Open homework due by the end of tomorrow, overdue included. */
+class HomeworkTomorrowWidget : HomeWidgetProvider() {
+    override fun onUpdate(context: Context, manager: AppWidgetManager, ids: IntArray, data: SharedPreferences) =
+        renderHomework(context, manager, ids, data, week = false)
+}
+
+/** Open homework due before next Monday, overdue included. */
+class HomeworkWeekWidget : HomeWidgetProvider() {
+    override fun onUpdate(context: Context, manager: AppWidgetManager, ids: IntArray, data: SharedPreferences) =
+        renderHomework(context, manager, ids, data, week = true)
+}
+
+private fun renderHomework(context: Context, manager: AppWidgetManager, ids: IntArray, data: SharedPreferences, week: Boolean) {
+    // No list yet: the app hasn't run since install. An empty list: nothing due.
+    val items = try {
+        data.getString("homework", null)?.let(::JSONArray)
+    } catch (e: Exception) {
+        null
+    }
+    val day = Calendar.getInstance().apply {
+        set(Calendar.HOUR_OF_DAY, 0); set(Calendar.MINUTE, 0); set(Calendar.SECOND, 0); set(Calendar.MILLISECOND, 0)
+    }
+    // Tomorrow ends at the start of the day after; the week ends at the next Monday.
+    val toMonday = (Calendar.MONDAY - day.get(Calendar.DAY_OF_WEEK) + 7) % 7
+    day.add(Calendar.DAY_OF_MONTH, if (!week) 2 else if (toMonday == 0) 7 else toMonday)
+    val limit = day.timeInMillis
+    val lines = items?.let { list ->
+        (0 until list.length()).map(list::getJSONObject).filter { it.getLong("due") < limit }.take(6)
+            .joinToString("
+") { it.getString("day") + " · " + it.getString("title") }
+    }
+    for (id in ids) {
+        val views = RemoteViews(context.packageName, R.layout.widget_homework)
+        views.setOnClickPendingIntent(R.id.widget_root, HomeWidgetLaunchIntent.getActivity(context, MainActivity::class.java))
+        views.setTextViewText(R.id.widget_label, context.getString(if (week) R.string.widget_homework_week_name else R.string.widget_homework_tomorrow_name))
+        views.setTextViewText(
+            R.id.widget_title,
+            when {
+                lines == null -> context.getString(R.string.widget_open_app)
+                lines.isEmpty() -> context.getString(if (week) R.string.widget_no_homework_week else R.string.widget_no_homework_tomorrow)
+                else -> lines
+            },
+        )
+        manager.updateAppWidget(id, views)
     }
 }
 

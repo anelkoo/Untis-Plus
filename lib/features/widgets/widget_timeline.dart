@@ -43,6 +43,7 @@ List<WidgetEntry> buildWidgetTimeline(
   String status(Lesson x) => switch (x.status) {
         .cancelled => l.statusCancelled,
         .substitution => l.statusSubstitution,
+        .roomChange => l.statusRoomChange,
         .irregular => l.statusIrregular,
         .exam => l.statusExam,
         .regular => '',

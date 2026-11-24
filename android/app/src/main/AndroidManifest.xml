@@ -45,6 +45,18 @@
             </intent-filter>
             <meta-data android:name="android.appwidget.provider" android:resource="@xml/widget_next_exam_info" />
         </receiver>
+        <receiver android:name=".widget.HomeworkTomorrowWidget" android:exported="false" android:label="@string/widget_homework_tomorrow_name">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/widget_homework_tomorrow_info" />
+        </receiver>
+        <receiver android:name=".widget.HomeworkWeekWidget" android:exported="false" android:label="@string/widget_homework_week_name">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/widget_homework_week_info" />
+        </receiver>
         <!-- Don't delete the meta-data below.
              This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->
         <meta-data

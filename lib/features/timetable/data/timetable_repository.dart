@@ -4,6 +4,7 @@ import 'package:drift/drift.dart';
 
 import '../../../core/db/app_database.dart';
 import '../../../core/network/webuntis_client.dart';
+import '../../homework/homework.dart';
 import '../domain/lesson.dart';
 import '../domain/timetable_diff.dart';
 
@@ -142,6 +143,32 @@ class TimetableRepository {
     } on Object {
       // See above.
     }
+  }
+
+  static const _homeworkKey = 'homework';
+
+  /// The stored homework from [refreshHomework]; null if it was never fetched.
+  Future<List<Homework>?> cachedHomework() async {
+    final row = await (_db.select(_db.cachedWeeks)..where((r) => r.target.equals(_homeworkKey))).getSingleOrNull();
+    return row == null ? null : parseHomework(jsonDecode(row.json) as Map);
+  }
+
+  /// Fetches my homework (a week back, two months ahead) unless the stored copy is younger than
+  /// [minAge]. Unlike exams this throws, so the screen can say the school doesn't share it.
+  Future<void> refreshHomework({Duration minAge = const Duration(hours: 1)}) async {
+    final row = await (_db.select(_db.cachedWeeks)..where((r) => r.target.equals(_homeworkKey))).getSingleOrNull();
+    final now = _now();
+    if (row != null && now.difference(row.fetchedAt) < minAge) return;
+    final res = await _client.getRest('/WebUntis/api/homeworks/lessons', {
+      'startDate': '${untisDate(now.subtract(const Duration(days: 7)))}',
+      'endDate': '${untisDate(now.add(const Duration(days: 60)))}',
+    });
+    await _db.into(_db.cachedWeeks).insertOnConflictUpdate(CachedWeeksCompanion.insert(
+          target: _homeworkKey,
+          monday: 0,
+          json: jsonEncode(res['data']),
+          fetchedAt: now,
+        ));
   }
 
   /// This account's exams in the week. Best effort: without them the timetable is still right,

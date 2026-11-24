@@ -2,7 +2,8 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'lesson.freezed.dart';
 
-enum LessonStatus { regular, cancelled, substitution, irregular, exam }
+/// [substitution]: another teacher or subject. [roomChange]: only the room differs.
+enum LessonStatus { regular, cancelled, substitution, roomChange, irregular, exam }
 
 /// A class, teacher, subject or room. [original] is set when it replaces another one
 /// (WebUntis `orgid`/`orgname`), e.g. the teacher who was planned before a substitution.
@@ -85,7 +86,8 @@ Lesson _parse(Map<String, dynamic> p) {
   final teachers = _names(p['te']);
   final rooms = _names(p['ro']);
   final subjects = _names(p['su']);
-  final replaced = [...teachers, ...rooms, ...subjects].any((n) => n.original != null);
+  final replaced = [...teachers, ...subjects].any((n) => n.original != null);
+  final roomMoved = rooms.any((n) => n.original != null);
   return Lesson(
     id: (p['id'] as num).toInt(),
     start: _at(date, (p['startTime'] as num).toInt()),
@@ -94,6 +96,7 @@ Lesson _parse(Map<String, dynamic> p) {
       'cancelled' => .cancelled,
       _ when p['lstype'] == 'ex' => .exam,
       _ when replaced => .substitution,
+      _ when roomMoved => .roomChange,
       'irregular' => .irregular,
       _ => .regular,
     },
@@ -176,7 +179,10 @@ Lesson? _tryParseRest(Object? e, Named klass) {
     final duration = m['duration'] as Map;
     final status = '${m['status']}';
     final type = '${m['type']}';
-    final replaced = byType.values.expand((l) => l).any((n) => n.original != null);
+    bool moved(bool Function(String) typeMatches) =>
+        byType.entries.where((e) => typeMatches(e.key)).expand((e) => e.value).any((n) => n.original != null);
+    final replaced = moved((t) => t != 'ROOM');
+    final roomMoved = moved((t) => t == 'ROOM');
     return Lesson(
       id: ((m['ids'] as List).first as num).toInt(),
       start: DateTime.parse('${duration['start']}'),
@@ -185,6 +191,7 @@ Lesson? _tryParseRest(Object? e, Named klass) {
         'CANCELLED' => .cancelled,
         _ when type == 'EXAM' => .exam,
         _ when replaced => .substitution,
+        _ when roomMoved => .roomChange,
         'REGULAR' when type == 'NORMAL_TEACHING_PERIOD' => .regular,
         _ => .irregular,
       },
