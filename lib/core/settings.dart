@@ -5,6 +5,8 @@ import 'dart:ui' show Color;
 import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
 
+import 'data_dir.dart';
+
 /// Look toggles from the settings screen.
 enum Look { sameColor, modernCards }
 
@@ -16,7 +18,7 @@ enum Slot { accent, exam, substitution, roomChange, cancelled, irregular, holida
 final look = ValueNotifier<Set<Look>>({});
 final colors = ValueNotifier<Map<Slot, Color>>({});
 
-Future<File> _file(String name) async => File('${(await getApplicationSupportDirectory()).path}/$name.json');
+Future<File> _file(String name) async => File('${(await dataDir(getApplicationSupportDirectory)).path}/$name.json');
 
 Future<void> _save(String name, Object json) async {
   try {
