@@ -108,7 +108,7 @@ jobs:
           mkdir -p $D/DEBIAN $D/opt/untis-plus $D/usr/bin $D/usr/share/applications $D/usr/share/icons/hicolor/192x192/apps
           cp -r $B/. $D/opt/untis-plus/
           ln -s /opt/untis-plus/untis_plus $D/usr/bin/untis-plus
-          cp linux/packaging/untis-plus.desktop $D/usr/share/applications/
+          cp linux/packaging/untis-plus.desktop $D/usr/share/applications/at.anelkoo.untis_plus.desktop
           cp $ICON $D/usr/share/icons/hicolor/192x192/apps/untis-plus.png
           sed "s/@VERSION@/$V/" linux/packaging/deb/control > $D/DEBIAN/control
           dpkg-deb --build --root-owner-group $D dist/untis-plus_${V}_amd64.deb

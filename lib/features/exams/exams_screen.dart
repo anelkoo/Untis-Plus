@@ -5,6 +5,7 @@ import 'package:material_ui/material_ui.dart';
 import '../../core/db/app_database.dart';
 import '../../core/l10n/app_localizations.dart';
 import '../auth/presentation/auth_providers.dart';
+import '../more/more_drawer.dart';
 import '../timetable/data/timetable_repository.dart';
 import '../timetable/domain/lesson.dart';
 
@@ -28,7 +29,7 @@ class ExamsScreen extends ConsumerWidget {
     final now = DateTime.now();
     final exams = [for (final e in ref.watch(examsProvider).value ?? const <Exam>[]) if (e.end.isAfter(now)) e];
     return Scaffold(
-      appBar: AppBar(title: Text(l.navTests)),
+      appBar: AppBar(leading: const MenuButton(), title: Text(l.navTests)),
       body: RefreshIndicator.adaptive(
         onRefresh: () async => ref.invalidate(examsProvider),
         child: exams.isEmpty

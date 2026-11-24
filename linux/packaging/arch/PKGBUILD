@@ -14,6 +14,6 @@ package() {
   install -d "$pkgdir/opt/untis-plus" "$pkgdir/usr/bin"
   cp -r "$srcdir/bundle/." "$pkgdir/opt/untis-plus/"
   ln -s /opt/untis-plus/untis_plus "$pkgdir/usr/bin/untis-plus"
-  install -Dm644 "$srcdir/untis-plus.desktop" "$pkgdir/usr/share/applications/untis-plus.desktop"
+  install -Dm644 "$srcdir/untis-plus.desktop" "$pkgdir/usr/share/applications/at.anelkoo.untis_plus.desktop"
   install -Dm644 "$srcdir/untis-plus.png" "$pkgdir/usr/share/icons/hicolor/192x192/apps/untis-plus.png"
 }

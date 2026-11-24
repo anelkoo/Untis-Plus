@@ -174,7 +174,7 @@ void main() {
 
   testWidgets('the menu has settings and sign out, no test notification', (tester) async {
     await _open(tester, width: 400);
-    await tester.tap(find.text('Mehr'));
+    await tester.tap(find.byIcon(Icons.menu));
     await tester.pumpAndSettle();
     expect(find.text('Testbenachrichtigung senden'), findsNothing);
     expect(find.text('Einstellungen'), findsOneWidget);
@@ -183,7 +183,7 @@ void main() {
 
   testWidgets('settings: a picked colour replaces the default', (tester) async {
     await _open(tester, width: 400);
-    await tester.tap(find.text('Mehr'));
+    await tester.tap(find.byIcon(Icons.menu));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Einstellungen'));
     await _settle(tester);
@@ -197,7 +197,7 @@ void main() {
 
   testWidgets('settings: one switch picks the modern lesson design for day and week', (tester) async {
     await _open(tester, width: 400);
-    await tester.tap(find.text('Mehr'));
+    await tester.tap(find.byIcon(Icons.menu));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Einstellungen'));
     await _settle(tester);
@@ -211,7 +211,7 @@ void main() {
 
   testWidgets('the menu opens the absences with missed lessons counted', (tester) async {
     await _open(tester, width: 360); // narrow phone: the app bar with four actions must still fit
-    await tester.tap(find.text('Mehr'));
+    await tester.tap(find.byIcon(Icons.menu));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Fehlstunden'));
     await _settle(tester);

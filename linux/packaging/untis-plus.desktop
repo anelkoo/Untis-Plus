@@ -6,3 +6,4 @@ Exec=untis-plus
 Icon=untis-plus
 Categories=Education;Office;
 Terminal=false
+StartupWMClass=at.anelkoo.untis_plus

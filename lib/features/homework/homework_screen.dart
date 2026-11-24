@@ -6,6 +6,7 @@ import '../../core/db/app_database.dart';
 import '../../core/errors/failure_text.dart';
 import '../../core/l10n/app_localizations.dart';
 import '../auth/presentation/auth_providers.dart';
+import '../more/more_drawer.dart';
 import '../timetable/data/timetable_repository.dart';
 import 'homework.dart';
 
@@ -32,7 +33,7 @@ class HomeworkScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l = AppLocalizations.of(context);
     return Scaffold(
-      appBar: AppBar(title: Text(l.navHomework)),
+      appBar: AppBar(leading: const MenuButton(), title: Text(l.navHomework)),
       body: RefreshIndicator.adaptive(
         onRefresh: () async => ref.invalidate(homeworkProvider),
         child: switch (ref.watch(homeworkProvider)) {

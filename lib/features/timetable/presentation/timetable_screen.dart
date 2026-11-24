@@ -10,6 +10,7 @@ import '../../../core/errors/failure_text.dart';
 import '../../../core/l10n/app_localizations.dart';
 import '../../../core/settings.dart';
 import '../../background/background_refresh.dart';
+import '../../more/more_drawer.dart';
 import '../../notifications/change_notifier.dart';
 import '../data/timetable_repository.dart';
 import '../domain/lesson.dart';
@@ -137,6 +138,7 @@ class _TimetableScreenState extends ConsumerState<TimetableScreen> {
       },
       child: Focus(autofocus: true, child: Scaffold(
       appBar: AppBar(
+        leading: const MenuButton(),
         title: SegmentedButton<bool>(
           showSelectedIcon: false,
           segments: [
