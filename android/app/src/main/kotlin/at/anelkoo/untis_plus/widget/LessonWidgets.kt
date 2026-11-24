@@ -78,8 +78,7 @@ private fun renderHomework(context: Context, manager: AppWidgetManager, ids: Int
     val limit = day.timeInMillis
     val lines = items?.let { list ->
         (0 until list.length()).map(list::getJSONObject).filter { it.getLong("due") < limit }.take(6)
-            .joinToString("
-") { it.getString("day") + " · " + it.getString("title") }
+            .joinToString("\n") { it.getString("day") + " · " + it.getString("title") }
     }
     for (id in ids) {
         val views = RemoteViews(context.packageName, R.layout.widget_homework)
