@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.3.2 (2026-11-24)
 
 ### Added
 - Burger menu at the top left of every tab replaces the "More" tab (#5).
