@@ -19,8 +19,15 @@ import '../domain/lesson.dart';
     .cancelled => Slot.cancelled,
     .irregular => Slot.irregular,
   };
-  // Exams must be impossible to miss: pure yellow with black text (19.6:1) unless the user chose another colour.
-  final fill = colors.value[slot] ?? (lesson.status == .exam ? examYellow : null);
+  // Exams and changes must be impossible to miss: a flat fill with readable text, unless the user chose another colour.
+  // Exams are pure yellow with black text (19.6:1).
+  final fill = colors.value[slot] ??
+      switch (lesson.status) {
+        .exam => examYellow,
+        .substitution || .irregular => scheme.tertiary,
+        .roomChange => scheme.secondary,
+        _ => null,
+      };
   if (fill != null) {
     final fg = readableOn(fill);
     return (background: fill, foreground: fg, accent: fg, border: lesson.status == .cancelled ? null : fg, solid: true);

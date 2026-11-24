@@ -61,7 +61,7 @@
   "changesMore": "+{count} more",
   "changesChannel": "Timetable changes",
   "moreOptions": "More options",
-  "lookSameColor": "One colour for all lessons",
+  "lookSameColor": "Simple design (one colour for all lessons)",
   "lookModern": "Modern lesson design (stripe instead of filled cards)",
   "widgetNoLessons": "No lessons in the next days",
   "exportCalendar": "Export to calendar",

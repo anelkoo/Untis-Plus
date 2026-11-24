@@ -229,7 +229,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get moreOptions => 'More options';
 
   @override
-  String get lookSameColor => 'One colour for all lessons';
+  String get lookSameColor => 'Simple design (one colour for all lessons)';
 
   @override
   String get lookModern =>

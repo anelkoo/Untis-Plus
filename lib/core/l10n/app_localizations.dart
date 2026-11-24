@@ -461,7 +461,7 @@ abstract class AppLocalizations {
   /// No description provided for @lookSameColor.
   ///
   /// In de, this message translates to:
-  /// **'Alle Stunden in einer Farbe'**
+  /// **'Einfaches Design (alle Stunden in einer Farbe)'**
   String get lookSameColor;
 
   /// No description provided for @lookModern.

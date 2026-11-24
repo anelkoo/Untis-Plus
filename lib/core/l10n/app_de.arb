@@ -73,7 +73,7 @@
   "@changesMore": { "placeholders": { "count": { "type": "int" } } },
   "changesChannel": "Stundenplan-Änderungen",
   "moreOptions": "Weitere Optionen",
-  "lookSameColor": "Alle Stunden in einer Farbe",
+  "lookSameColor": "Einfaches Design (alle Stunden in einer Farbe)",
   "lookModern": "Modernes Design für Stunden (Streifen statt Farbfläche)",
   "widgetNoLessons": "Keine Stunden in den nächsten Tagen",
   "exportCalendar": "In Kalender exportieren",

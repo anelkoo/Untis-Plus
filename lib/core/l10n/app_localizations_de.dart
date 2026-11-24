@@ -230,7 +230,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get moreOptions => 'Weitere Optionen';
 
   @override
-  String get lookSameColor => 'Alle Stunden in einer Farbe';
+  String get lookSameColor => 'Einfaches Design (alle Stunden in einer Farbe)';
 
   @override
   String get lookModern =>

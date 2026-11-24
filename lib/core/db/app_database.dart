@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:drift/drift.dart';
 import 'package:drift_flutter/drift_flutter.dart';
 import 'package:path_provider/path_provider.dart';
@@ -33,10 +35,7 @@ class AppDatabase extends _$AppDatabase {
             driftDatabase(
               name: 'untis_plus',
               // The background refresh opens the database while the app may be open too.
-              native: DriftNativeOptions(
-                shareAcrossIsolates: true,
-                databaseDirectory: () => dataDir(getApplicationDocumentsDirectory),
-              ),
+              native: const DriftNativeOptions(shareAcrossIsolates: true, databasePath: _databasePath),
             ));
 
   @override
@@ -48,6 +47,21 @@ class AppDatabase extends _$AppDatabase {
           if (from < 2) await m.createTable(favouriteTeachers);
         },
       );
+}
+
+/// The app's data folder, not Documents. Moves a database that older versions left in Documents.
+Future<String> _databasePath() async {
+  final file = File('${(await dataDir(getApplicationSupportDirectory)).path}/untis_plus.sqlite');
+  final old = File('${(await getApplicationDocumentsDirectory()).path}/untis_plus.sqlite');
+  if (!file.existsSync() && old.existsSync()) {
+    try {
+      await old.copy(file.path);
+      await old.delete();
+    } on Object {
+      // Starts empty; the next refresh refills the cache.
+    }
+  }
+  return file.path;
 }
 
 @Riverpod(keepAlive: true)
