@@ -190,9 +190,9 @@ jobs:
     needs: [android, windows, linux, arch, ios]
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
       - uses: actions/download-artifact@v4
         with: { path: dist, merge-multiple: true }
-      - uses: actions/checkout@v4
       - name: Release notes from CHANGELOG.md
         run: |
           V=${GITHUB_REF_NAME#v}
@@ -202,3 +202,4 @@ jobs:
         with:
           files: dist/*
           body_path: notes.md
+          fail_on_unmatched_files: true
