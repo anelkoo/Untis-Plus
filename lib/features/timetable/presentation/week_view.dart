@@ -1,10 +1,12 @@
 import 'dart:math' as math;
 
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:material_ui/material_ui.dart';
 
 import '../../../core/l10n/app_localizations.dart';
 import '../../../core/settings.dart';
+import '../../homework/lesson_homework.dart';
 import '../domain/day_layout.dart';
 import '../domain/lesson.dart';
 import 'lesson_widgets.dart';
@@ -195,7 +197,7 @@ class _DayHeader extends StatelessWidget {
   }
 }
 
-class _LessonCard extends StatelessWidget {
+class _LessonCard extends ConsumerWidget {
   const _LessonCard({required this.lesson, required this.locale, required this.showClasses});
 
   final Lesson lesson;
@@ -203,8 +205,9 @@ class _LessonCard extends StatelessWidget {
   final bool showClasses;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final l = AppLocalizations.of(context);
+    final homework = ref.watch(lessonHomeworkProvider(lesson)).isNotEmpty;
     var colors = lessonColors(context, lesson);
     final status = lessonStatus(l, lesson);
     final theme = Theme.of(context);
@@ -245,6 +248,14 @@ class _LessonCard extends StatelessWidget {
                     child: Padding(
                       padding: const EdgeInsets.only(right: 2),
                       child: Icon(status.icon, size: 13, color: colors.border ?? colors.foreground),
+                    ),
+                  ),
+                if (homework)
+                  WidgetSpan(
+                    alignment: .middle,
+                    child: Padding(
+                      padding: const EdgeInsets.only(right: 2),
+                      child: Icon(Icons.menu_book_outlined, size: 13, color: colors.foreground),
                     ),
                   ),
                 TextSpan(

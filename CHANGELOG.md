@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.3.4 (2026-11-26)
+
+### Added
+- Class timetables: search for a class the same way you search for a teacher or a room.
+- Open homework shows on its lesson: the text in the day list and lesson details, a book icon in the week view.
+- The day list marks free time of 15 minutes or more between lessons.
+- You can drag with the mouse to move to the next or previous day or week.
+
+### Changed
+- One "Other timetable" menu replaces the separate teacher and room search buttons.
+- A line above the timetable says whose it is.
+- On Windows and Linux the window can't be made too small anymore (minimum 360 × 480).
+
 ## 0.3.3 (2026-11-24)
 
 ### Added

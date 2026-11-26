@@ -1,9 +1,11 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:material_ui/material_ui.dart';
 
 import '../../../core/adaptive_sheet.dart';
 import '../../../core/l10n/app_localizations.dart';
 import '../../../core/settings.dart';
+import '../../homework/lesson_homework.dart';
 import '../domain/lesson.dart';
 
 /// Colours for a lesson card. Each subject gets its own stable hue; the container/on-container
@@ -152,6 +154,16 @@ void showLessonDetails(BuildContext context, Lesson lesson) {
           if (lesson.classes.isNotEmpty) names(Icons.groups_outlined, l.classesLabel, lesson.classes),
           for (final t in {lesson.lessonText, lesson.substitutionText, lesson.info})
             if (t.isNotEmpty) text(Icons.notes, t),
+          Consumer(
+            builder: (context, ref, _) => Column(children: [
+              for (final h in ref.watch(lessonHomeworkProvider(lesson)))
+                ListTile(
+                  leading: const Icon(Icons.menu_book_outlined),
+                  title: Text(h.text),
+                  subtitle: Text(l.navHomework),
+                ),
+            ]),
+          ),
         ],
       ),
     ),

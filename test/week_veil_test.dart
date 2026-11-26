@@ -1,6 +1,8 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:untis_plus/core/l10n/app_localizations.dart';
+import 'package:untis_plus/features/homework/lesson_homework.dart';
 import 'package:untis_plus/features/timetable/domain/lesson.dart';
 import 'package:untis_plus/features/timetable/presentation/week_view.dart';
 
@@ -13,7 +15,9 @@ void main() {
           end: DateTime(2026, 11, 23 + day, hour, 50),
           subjects: const [Named(id: 1, name: 'AM')],
         );
-    await tester.pumpWidget(MaterialApp(
+    await tester.pumpWidget(ProviderScope(
+      overrides: [lessonHomeworkProvider.overrideWith((ref, lesson) => const [])],
+      child: MaterialApp(
       localizationsDelegates: const [AppLocalizations.delegate, ...GlobalMaterialLocalizations.delegates],
       supportedLocales: AppLocalizations.supportedLocales,
       home: Scaffold(
@@ -23,7 +27,7 @@ void main() {
           now: DateTime(2026, 11, 24, 9, 20),
         ),
       ),
-    ));
+    )));
     final scheme = Theme.of(tester.element(find.byType(WeekGrid))).colorScheme;
     final veils = find.byWidgetPredicate((w) => w is ColoredBox && w.color == scheme.surface.withValues(alpha: 0.55));
     expect(veils, findsNWidgets(2)); // Monday whole, Tuesday up to 9:20

@@ -197,6 +197,15 @@ Win32Window::MessageHandler(HWND hwnd,
 
       return 0;
     }
+    case WM_GETMINMAXINFO: {
+      // Smallest window: 360 x 480 logical pixels.
+      const double scale = GetDpiForWindow(hwnd) / 96.0;
+      MINMAXINFO* info = reinterpret_cast<MINMAXINFO*>(lparam);
+      info->ptMinTrackSize.x = static_cast<LONG>(360 * scale);
+      info->ptMinTrackSize.y = static_cast<LONG>(480 * scale);
+      return 0;
+    }
+
     case WM_SIZE: {
       RECT rect = GetClientArea();
       if (child_content_ != nullptr) {

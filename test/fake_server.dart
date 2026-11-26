@@ -41,6 +41,16 @@ String schoolHandler(String method, RequestOptions _) => switch (method) {
           {'id': 1, 'name': 'AT', 'longName': 'Autonomer Tag', 'startDate': 20261127, 'endDate': 20261127},
           {'id': 2, 'name': 'Weihn', 'longName': 'Weihnachtsferien', 'startDate': 20261224, 'endDate': 20270106},
         ]),
+      '/WebUntis/api/homeworks/lessons' => jsonEncode({
+          'data': {
+            'lessons': [
+              {'id': 7, 'subject': 'D'},
+            ],
+            'homeworks': [
+              {'id': 1, 'lessonId': 7, 'dueDate': 20261123, 'text': 'Aufsatz schreiben', 'completed': false},
+            ],
+          },
+        }),
       '/WebUntis/api/token/new' => 'header.payload.signature',
       '/WebUntis/api/exams' => fixture('api_exams.json'),
       'getCurrentSchoolyear' => rpcResult({'id': 23, 'name': '2026/2027', 'startDate': 20260914, 'endDate': 20270711}),

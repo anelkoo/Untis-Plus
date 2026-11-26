@@ -151,6 +151,34 @@ class AppLocalizationsEn extends AppLocalizations {
   String get allRoomsLabel => 'All rooms';
 
   @override
+  String get otherTimetables => 'Other timetable';
+
+  @override
+  String get ownTimetable => 'Your timetable';
+
+  @override
+  String breakLabel(String from, String to) {
+    return 'Free $from to $to';
+  }
+
+  @override
+  String timetableOf(String name) {
+    return 'Timetable $name';
+  }
+
+  @override
+  String get classSearch => 'Find a class';
+
+  @override
+  String get classSearchHint => 'Class name';
+
+  @override
+  String get noClassesFound => 'No class found.';
+
+  @override
+  String get allClassesLabel => 'All classes';
+
+  @override
   String get absencesTitle => 'Absences';
 
   @override

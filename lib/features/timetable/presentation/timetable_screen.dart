@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:flutter/gestures.dart' show PointerDeviceKind;
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -42,8 +43,8 @@ class _TimetableScreenState extends ConsumerState<TimetableScreen> {
   bool? _weekMode; // null until the screen width picks a default
   late PageController _pager;
   int _page = _anchor;
-  // null: my own timetable; else a teacher's or a room's, filtered from all classes.
-  ({Named who, bool room})? _filter;
+  // null: my own timetable; else a teacher's, room's or class's, filtered from all classes.
+  ({Named who, Pick kind})? _filter;
 
   DateTime _weekAt(int page) => DateTime(_baseMonday.year, _baseMonday.month, _baseMonday.day + 7 * (page - _anchor));
 
@@ -171,21 +172,18 @@ class _TimetableScreenState extends ConsumerState<TimetableScreen> {
           onSelectionChanged: (s) => setState(() => _setMode(s.first)),
         ),
         actions: [
-          IconButton(
-            tooltip: l.teacherSearch,
+          PopupMenuButton<Pick>(
+            tooltip: l.otherTimetables,
             icon: const Icon(Icons.person_search_outlined),
-            onPressed: () async {
-              final teacher = await showTeacherPicker(context, mondayOf(_shownDay));
-              if (teacher != null) setState(() => _filter = (who: teacher, room: false));
+            onSelected: (kind) async {
+              final who = await showTeacherPicker(context, mondayOf(_shownDay), kind: kind);
+              if (who != null) setState(() => _filter = (who: who, kind: kind));
             },
-          ),
-          IconButton(
-            tooltip: l.roomSearch,
-            icon: const Icon(Icons.meeting_room_outlined),
-            onPressed: () async {
-              final room = await showTeacherPicker(context, mondayOf(_shownDay), rooms: true);
-              if (room != null) setState(() => _filter = (who: room, room: true));
-            },
+            itemBuilder: (_) => [
+              PopupMenuItem(value: Pick.klass, child: Text(l.classSearch)),
+              PopupMenuItem(value: Pick.teacher, child: Text(l.teacherSearch)),
+              PopupMenuItem(value: Pick.room, child: Text(l.roomSearch)),
+            ],
           ),
         ],
         bottom: PreferredSize(
@@ -211,28 +209,38 @@ class _TimetableScreenState extends ConsumerState<TimetableScreen> {
       ),
       body: Column(
         children: [
-          if (_filter case (:final who, :final room))
-            Padding(
-              padding: const EdgeInsets.only(top: 4),
-              child: InputChip(
-                avatar: Icon(room ? Icons.meeting_room_outlined : Icons.person_outline),
-                label: Text(
-                  who.longName.isEmpty || who.longName == who.name ? who.name : '${who.longName} (${who.name})',
+          Padding(
+            padding: const EdgeInsets.only(top: 4),
+            child: switch (_filter) {
+              (:final who, :final kind) => InputChip(
+                  avatar: Icon(switch (kind) {
+                    Pick.room => Icons.meeting_room_outlined,
+                    Pick.klass => Icons.groups_outlined,
+                    _ => Icons.person_outline,
+                  }),
+                  label: Text(l.timetableOf(
+                    who.longName.isEmpty || who.longName == who.name ? who.name : '${who.longName} (${who.name})',
+                  )),
+                  deleteButtonTooltipMessage: l.myTimetable,
+                  onDeleted: () => setState(() => _filter = null),
                 ),
-                deleteButtonTooltipMessage: l.myTimetable,
-                onDeleted: () => setState(() => _filter = null),
-              ),
-            ),
+              null => Text(l.ownTimetable, style: Theme.of(context).textTheme.titleMedium),
+            },
+          ),
           Expanded(
             // Rebuilds the pages when a look toggle or colour changes.
-            child: ListenableBuilder(listenable: Listenable.merge([look, colors]), builder: (context, _) => PageView.builder(
-              key: ObjectKey(_pager),
-              controller: _pager,
-              onPageChanged: (p) => setState(() => _page = p),
-              itemBuilder: (context, page) {
-                final day = weekMode ? _weekAt(page) : _dayAt(page);
-                return _WeekPage(monday: mondayOf(day), day: weekMode ? null : day, filter: _filter);
-              },
+            child: ListenableBuilder(listenable: Listenable.merge([look, colors]), builder: (context, _) => ScrollConfiguration(
+              // The mouse drags the pages like a finger or a touchpad does.
+              behavior: ScrollConfiguration.of(context).copyWith(dragDevices: PointerDeviceKind.values.toSet()),
+              child: PageView.builder(
+                key: ObjectKey(_pager),
+                controller: _pager,
+                onPageChanged: (p) => setState(() => _page = p),
+                itemBuilder: (context, page) {
+                  final day = weekMode ? _weekAt(page) : _dayAt(page);
+                  return _WeekPage(monday: mondayOf(day), day: weekMode ? null : day, filter: _filter);
+                },
+              ),
             )),
           ),
         ],
@@ -241,14 +249,14 @@ class _TimetableScreenState extends ConsumerState<TimetableScreen> {
   }
 }
 
-/// Loads one week and shows it as a grid, or as the list of [day]: mine, or a teacher's or
-/// room's from [filter] (filtered from all class timetables).
+/// Loads one week and shows it as a grid, or as the list of [day]: mine, or a
+/// teacher's, room's or class's from [filter] (filtered from all class timetables).
 class _WeekPage extends ConsumerWidget {
   const _WeekPage({required this.monday, this.day, this.filter});
 
   final DateTime monday;
   final DateTime? day;
-  final ({Named who, bool room})? filter;
+  final ({Named who, Pick kind})? filter;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -300,17 +308,25 @@ class _WeekPage extends ConsumerWidget {
     BuildContext context,
     WidgetRef ref,
     Week value,
-    ({Named who, bool room})? teacher,
+    ({Named who, Pick kind})? teacher,
     Future<void> Function() refresh,
   ) {
     final l = AppLocalizations.of(context);
     final locale = Localizations.localeOf(context).toString();
     final theme = Theme.of(context);
-    final lessons = teacher == null
-        ? value.lessons
-        : value.lessons
-            .where((x) => (teacher.room ? x.rooms : x.teachers).any((t) => t.name == teacher.who.name))
-            .toList();
+    final lessons = switch (teacher) {
+      null => value.lessons,
+      (:final who, :final kind) => value.lessons
+          .where((x) => (switch (kind) {
+                Pick.room => x.rooms,
+                Pick.klass => x.classes,
+                _ => x.teachers,
+              })
+              .any((t) => t.name == who.name))
+          .toList(),
+    };
+    // Other teachers' and rooms' lessons show their classes; the rest show the teachers.
+    final showClasses = teacher != null && (teacher.kind == Pick.teacher || teacher.kind == Pick.room);
     return Column(
       children: [
         Padding(
@@ -333,14 +349,14 @@ class _WeekPage extends ConsumerWidget {
                     monday: monday,
                     lessons: lessons,
                     now: clock(),
-                    showClasses: teacher != null,
+                    showClasses: showClasses,
                     holidays: value.holidays,
                   )
                 : DayList(
                     day: day!,
                     lessons: lessons,
                     now: clock(),
-                    showClasses: teacher != null,
+                    showClasses: showClasses,
                     holidays: value.holidays,
                   ),
           ),

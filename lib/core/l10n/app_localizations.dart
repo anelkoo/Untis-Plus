@@ -362,6 +362,54 @@ abstract class AppLocalizations {
   /// **'Alle Räume'**
   String get allRoomsLabel;
 
+  /// No description provided for @otherTimetables.
+  ///
+  /// In de, this message translates to:
+  /// **'Anderer Stundenplan'**
+  String get otherTimetables;
+
+  /// No description provided for @ownTimetable.
+  ///
+  /// In de, this message translates to:
+  /// **'Dein Stundenplan'**
+  String get ownTimetable;
+
+  /// No description provided for @breakLabel.
+  ///
+  /// In de, this message translates to:
+  /// **'Frei {from} bis {to}'**
+  String breakLabel(String from, String to);
+
+  /// No description provided for @timetableOf.
+  ///
+  /// In de, this message translates to:
+  /// **'Stundenplan {name}'**
+  String timetableOf(String name);
+
+  /// No description provided for @classSearch.
+  ///
+  /// In de, this message translates to:
+  /// **'Klasse suchen'**
+  String get classSearch;
+
+  /// No description provided for @classSearchHint.
+  ///
+  /// In de, this message translates to:
+  /// **'Klassenname'**
+  String get classSearchHint;
+
+  /// No description provided for @noClassesFound.
+  ///
+  /// In de, this message translates to:
+  /// **'Keine Klasse gefunden.'**
+  String get noClassesFound;
+
+  /// No description provided for @allClassesLabel.
+  ///
+  /// In de, this message translates to:
+  /// **'Alle Klassen'**
+  String get allClassesLabel;
+
   /// No description provided for @absencesTitle.
   ///
   /// In de, this message translates to:

@@ -1,8 +1,10 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:material_ui/material_ui.dart';
 
 import '../../../core/l10n/app_localizations.dart';
 import '../../../core/settings.dart';
+import '../../homework/lesson_homework.dart';
 import '../domain/day_layout.dart';
 import '../domain/lesson.dart';
 import 'lesson_widgets.dart';
@@ -33,7 +35,15 @@ class DayList extends StatelessWidget {
     final locale = Localizations.localeOf(context).toString();
     final today = lessons
         .where((x) => DateUtils.isSameDay(x.start, day))
-        .toList();
+        .toList()
+      ..sort((a, b) => a.start.compareTo(b.start));
+    // Latest end so far, so a lesson running parallel to another doesn't fake a break.
+    final latestEnd = <DateTime>[];
+    for (final x in today) {
+      latestEnd.add(
+        latestEnd.isEmpty || x.end.isAfter(latestEnd.last) ? x.end : latestEnd.last,
+      );
+    }
     final nn = nowNext(today, now);
     return ListView(
       physics: const AlwaysScrollableScrollPhysics(),
@@ -104,14 +114,54 @@ class DayList extends StatelessWidget {
                     },
                   ),
           ),
-        for (final lesson in today)
+        for (final (i, lesson) in today.indexed) ...[
+          if (i > 0 && lesson.start.difference(latestEnd[i - 1]) >= _minBreak)
+            _BreakRow(
+              label: l.breakLabel(
+                DateFormat.Hm(locale).format(latestEnd[i - 1]),
+                DateFormat.Hm(locale).format(lesson.start),
+              ),
+            ),
           _LessonRow(
             lesson: lesson,
             locale: locale,
             showClasses: showClasses,
             now: now,
           ),
+        ],
       ],
+    );
+  }
+}
+
+const _minBreak = Duration(minutes: 15);
+
+class _BreakRow extends StatelessWidget {
+  const _BreakRow({required this.label});
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: Row(
+        children: [
+          const SizedBox(width: 48),
+          Expanded(child: Divider(color: theme.colorScheme.outlineVariant)),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            child: Text(
+              label,
+              style: theme.textTheme.labelMedium?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ),
+          Expanded(child: Divider(color: theme.colorScheme.outlineVariant)),
+        ],
+      ),
     );
   }
 }
@@ -151,7 +201,7 @@ class _NowNextRow extends StatelessWidget {
   }
 }
 
-class _LessonRow extends StatelessWidget {
+class _LessonRow extends ConsumerWidget {
   const _LessonRow({
     required this.lesson,
     required this.locale,
@@ -165,8 +215,9 @@ class _LessonRow extends StatelessWidget {
   final bool showClasses;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final l = AppLocalizations.of(context);
+    final homework = ref.watch(lessonHomeworkProvider(lesson));
     final colors = lessonColors(context, lesson);
     // Exams and colours the user picked fill the row; with the week design every lesson sits on its colour.
     final filled = colors.solid || !look.value.contains(Look.modernCards);
@@ -290,6 +341,18 @@ class _LessonRow extends StatelessWidget {
                             details,
                             style: theme.textTheme.bodyMedium?.copyWith(
                               color: theme.colorScheme.onSurfaceVariant,
+                            ),
+                          ),
+                        for (final h in homework)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 2),
+                            child: Row(
+                              crossAxisAlignment: .start,
+                              children: [
+                                const Icon(Icons.menu_book_outlined, size: 16),
+                                const SizedBox(width: 4),
+                                Expanded(child: Text(h.text, maxLines: 2, overflow: .ellipsis)),
+                              ],
                             ),
                           ),
                         // The lesson that is running: how far along it is.

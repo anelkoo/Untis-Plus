@@ -1,3 +1,4 @@
+import 'package:flutter/gestures.dart' show PointerDeviceKind;
 import 'package:drift/native.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -11,6 +12,7 @@ import 'package:untis_plus/features/auth/domain/credentials.dart';
 import 'package:untis_plus/features/auth/domain/school.dart';
 import 'package:untis_plus/features/auth/presentation/auth_providers.dart';
 import 'package:untis_plus/features/timetable/presentation/jump.dart';
+import 'package:untis_plus/features/timetable/presentation/week_view.dart';
 import 'package:untis_plus/features/timetable/presentation/timetable_screen.dart' as screen;
 
 import 'fake_server.dart';
@@ -134,7 +136,9 @@ void main() {
   testWidgets('teacher search: star a favourite, open their week with classes instead of teachers',
       (tester) async {
     await _open(tester, width: 1000, now: DateTime(2026, 11, 16, 8));
-    await tester.tap(find.byTooltip('Lehrer suchen'));
+    await tester.tap(find.byTooltip('Anderer Stundenplan'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Lehrer suchen'));
     await _settle(tester);
     expect(find.text('Moser'), findsOneWidget);
     expect(find.text('Leitner'), findsNothing); // replaced, not teaching
@@ -148,18 +152,54 @@ void main() {
     await tester.tap(find.text('Jedinger'));
     await _settle(tester);
 
-    expect(find.text('Jedinger (JEDA)'), findsOneWidget);
+    expect(find.text('Stundenplan Jedinger (JEDA)'), findsOneWidget);
     expect(find.textContaining('1M\n1AHIT, 2AHIT', findRichText: true), findsOneWidget);
     expect(find.textContaining('E1', findRichText: true), findsNothing); // Moser's lesson
 
     await tester.tap(find.byTooltip('Mein Stundenplan'));
     await _settle(tester);
-    expect(find.text('Jedinger (JEDA)'), findsNothing);
+    expect(find.text('Stundenplan Jedinger (JEDA)'), findsNothing);
+  });
+
+  testWidgets('homework sits on the first lesson of its subject on the due day', (tester) async {
+    await _open(tester, width: 1000);
+    // One card, not the second Deutsch lesson; the bottom bar has the same icon.
+    expect(find.descendant(of: find.byType(WeekGrid), matching: find.byIcon(Icons.menu_book_outlined)), findsOneWidget);
+    await tester.tap(find.bySemanticsLabel(RegExp('^Deutsch')));
+    await tester.pumpAndSettle();
+    expect(find.text('Aufsatz schreiben'), findsOneWidget);
+  });
+
+  testWidgets('a mouse drag turns the week like a touchpad swipe', (tester) async {
+    final server = await _open(tester, width: 1000);
+    final mouse = await tester.startGesture(const Offset(700, 400), kind: PointerDeviceKind.mouse);
+    for (var i = 0; i < 10; i++) {
+      await mouse.moveBy(const Offset(-60, 0));
+      await tester.pump(const Duration(milliseconds: 16));
+    }
+    await mouse.up();
+    await _settle(tester);
+    expect(_startDate(server), 20261130);
+  });
+
+  testWidgets('class search: open a class week under its title', (tester) async {
+    await _open(tester, width: 1000, now: DateTime(2026, 11, 16, 8));
+    expect(find.text('Dein Stundenplan'), findsOneWidget);
+    await tester.tap(find.byTooltip('Anderer Stundenplan'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Klasse suchen'));
+    await _settle(tester);
+    await tester.tap(find.text('1AHIT'));
+    await _settle(tester);
+    expect(find.text('Stundenplan 1a Muster (1AHIT)'), findsOneWidget);
+    expect(find.text('Dein Stundenplan'), findsNothing);
   });
 
   testWidgets('room search: open a room\'s week, filtered from all classes', (tester) async {
     await _open(tester, width: 1000, now: DateTime(2026, 11, 16, 8));
-    await tester.tap(find.byTooltip('Raum suchen'));
+    await tester.tap(find.byTooltip('Anderer Stundenplan'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Raum suchen'));
     await _settle(tester);
     expect(find.text('1M'), findsOneWidget);
     expect(find.byTooltip('Zu Favoriten'), findsNothing);
@@ -170,7 +210,7 @@ void main() {
     await tester.tap(find.text('TURN2'));
     await _settle(tester);
 
-    expect(find.widgetWithText(InputChip, 'TURN2'), findsOneWidget);
+    expect(find.widgetWithText(InputChip, 'Stundenplan TURN2'), findsOneWidget);
     expect(find.textContaining('BSPK', findRichText: true), findsOneWidget);
     expect(find.textContaining('E1', findRichText: true), findsNothing); // in room 1M
   });
